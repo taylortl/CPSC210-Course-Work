@@ -33,12 +33,12 @@ public class Driver {
     }
 
     // Getters
-    public double getRanking() {
-        return ranking;
-    }
-
     public int getNumber() {
         return number;
+    }
+
+    public double getRanking() {
+        return ranking;
     }
 
     public String getName() {
@@ -61,8 +61,15 @@ public class Driver {
                  and the driver's location is changed to the destination after the ride.
      */
     public void changeAvailability(int time, int duration, int destination) {
-        Arrays.fill(availability, time, (time + duration) + 1, 0);
-        Arrays.fill(availability, time + duration, availability.length, destination);
+        Arrays.fill(availability, time, (time + duration), 0);
+        for (int i = time + duration; i < availability.length; i++) {
+            if (availability[i] == 0) {
+                break;
+            } else {
+                availability[i] = destination;
+            }
+        }
+
     }
 
     /*
@@ -71,9 +78,9 @@ public class Driver {
      */
     public void availableAgain(int time, int duration) {
         if (time == 0) {
-            Arrays.fill(availability, time, (time + duration) + 1, zone);
+            Arrays.fill(availability, time, (time + duration), zone);
         } else {
-            Arrays.fill(availability, time, (time + duration) + 1, availability[time - 1]);
+            Arrays.fill(availability, time, (time + duration), availability[time - 1]);
         }
     }
 
@@ -90,6 +97,5 @@ public class Driver {
     public String getInformation() {
         return (number + ": " + name + " - " + ranking + "/5");
     }
-
 
 }
