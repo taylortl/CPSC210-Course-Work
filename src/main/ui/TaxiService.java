@@ -57,6 +57,7 @@ public class TaxiService {
         }
     }
 
+    // EFFECTS: print the price table.
     private void printPrice() {
         System.out.println("---------------------------------------");
         System.out.println("Ride within 1 zone   $" + ONE_ZONE_COST);
@@ -78,9 +79,11 @@ public class TaxiService {
         System.out.println("---------------------------------------");
     }
 
+    // REQUIRES: 0 <= driver < number of drivers created
+    // EFFECTS: returns the name of the driver given the id of the driver.
     private String getDriverName(int driver) {
         for (Driver d : drivers) {
-            if (d.getNumber() == driver) {
+            if (d.getId() == driver) {
                 return d.getName();
             }
         }
@@ -98,7 +101,7 @@ public class TaxiService {
         System.out.println("---------------------------------------");
     }
 
-    // EFFECTS: show a message when the user gives a wrong input
+    // EFFECTS: show a message when the user gives a wrong input.
     private void incorrectInput() {
         System.out.println("Sorry, you have typed an invalid input. Please start again.");
     }
@@ -179,9 +182,13 @@ public class TaxiService {
         }
     }
 
+    /* REQUIRES: 0 <= driver < number of drivers created, 0 <= ranking <= 5
+       MODIFIES: this
+       EFFECTS: update the ranking of the given driver.
+     */
     private void changeRanking(int driver, double ranking) {
         for (Driver d : drivers) {
-            if (d.getNumber() == driver) {
+            if (d.getId() == driver) {
                 d.changeRanking(ranking);
                 break;
             }
@@ -189,7 +196,7 @@ public class TaxiService {
         System.out.println("Thank you for giving us advice.");
     }
 
-    /* REQUIRES: 0 <= reference <= number of rides booked
+    /* REQUIRES: 0 <= reference < number of rides booked
        MODIFIES: this
        EFFECTS: change the ranking of the driver according to the given ranking from user.
      */
@@ -209,7 +216,6 @@ public class TaxiService {
                 }
                 break;
             }
-
         }
         if (!rideFound) {
             System.out.println("Sorry you input the wrong booking number.");
@@ -273,14 +279,14 @@ public class TaxiService {
 
     /*
         REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1 <= destination <= 5,
-                  0 <= selected <= number of drivers, 0 <= additional <= 4
+                  0 <= selected < number of drivers created, 0 <= additional <= 4
         MODIFIES: this
         EFFECTS: add a ride to the list and change te availability of the driver,
                  additional cost needed if origin and destination are not in the same zone.
      */
     private void addRide(int time, int start, int destination, int selected, int additional) {
         for (Driver d : drivers) {
-            if (d.getNumber() == selected) {
+            if (d.getId() == selected) {
                 d.changeAvailability(time, abs(start - destination) + 1, destination);
                 break;
             }
@@ -292,8 +298,8 @@ public class TaxiService {
 
     /*
         REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1 <= destination <= 5,
-                  0 <= selected <= number of drivers, 0 <= additional <= 4
-        EFFECTS: print the cost of the ride after adding the ride.
+                  0 <= selected < number of drivers created, 0 <= additional <= 4
+        EFFECTS: print the cost of the ride after adding the ride to the list.
      */
     private void receipt(int time, int start, int destination, int selected, int additional) {
         addRide(time, start, destination, selected, additional);
@@ -302,10 +308,12 @@ public class TaxiService {
                 + " ,our driver will contact you soon.");
     }
 
+    // REQUIRES: 0 <= selected < number of drivers created, 0 <= time <= 23
+    // EFFEECTS: returns the zone of the given driver.
     private int getDriverZone(int selected, int time) {
         int availability = 0;
         for (Driver d : drivers) {
-            if (d.getNumber() == selected) {
+            if (d.getId() == selected) {
                 availability = d.getAvailability(time);
                 break;
             }
@@ -377,6 +385,10 @@ public class TaxiService {
         }
     }
 
+    /* REQUIRES: 0 <= driver < number of drivers created, 0 <= ride < number of rides booked, 1 <= duration <= 4
+       MODIFIES: this
+       EFFECTS: make the driver available for booking during the time of the given ride.
+     */
     private void cancelRideForDriver(int driver, int ride, int duration) {
         int time = -1;
         for (Ride r : rides) {
@@ -386,7 +398,7 @@ public class TaxiService {
             }
         }
         for (Driver d : drivers) {
-            if (d.getNumber() == driver) {
+            if (d.getId() == driver) {
                 d.availableAgain(time, duration);
                 break;
             }
@@ -394,7 +406,7 @@ public class TaxiService {
     }
 
     /*
-        REQUIRES: 0 <= rideNumber <= number of rides booked
+        REQUIRES: 0 <= rideNumber < number of rides booked
         MODIFIES: this
         EFFECTS: remove the ride from our list,
                  set the driver to be available in its original zone in that period.

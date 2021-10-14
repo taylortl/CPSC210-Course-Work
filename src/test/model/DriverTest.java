@@ -3,8 +3,6 @@ package model;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-
 import static java.lang.Math.abs;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,7 +19,7 @@ class DriverTest {
     @Test
     public void testConstructor() {
         assertEquals(name, numberOne.getName());
-        assertTrue(numberOne.getNumber() >= 0);
+        assertTrue(numberOne.getId() >= 0);
         assertEquals(2.5, numberOne.getRanking());
         for (int i = 0; i < 24; i++) {
             assertEquals(5, numberOne.getAvailability(i));
@@ -121,7 +119,7 @@ class DriverTest {
 
     @Test
     public void testGetInformation() {
-        String expected = numberOne.getNumber() + ": " + name + " - " + numberOne.getRanking() + "/5";
+        String expected = numberOne.getId() + ": " + name + " - " + numberOne.getRanking() + "/5";
         assertEquals(expected, numberOne.getInformation());
     }
 }

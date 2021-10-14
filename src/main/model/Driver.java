@@ -6,7 +6,7 @@ public class Driver {
     private static int driverNum = 0;
 
     private String name; // name of the driver
-    private int number; // number corresponding to the driver
+    private int id; // number corresponding to the driver
     private int zone;
     private double ranking; // ranking of the driver
     private int numberOfCustomers = 0;
@@ -24,7 +24,7 @@ public class Driver {
                  give a number to this driver.
      */
     public Driver(String name, int zone) {
-        number = driverNum++;
+        id = driverNum++;
         this.name = name;
         this.zone = zone;
         availability = new int[24];
@@ -33,8 +33,8 @@ public class Driver {
     }
 
     // Getters
-    public int getNumber() {
-        return number;
+    public int getId() {
+        return id;
     }
 
     public double getRanking() {
@@ -95,7 +95,7 @@ public class Driver {
 
     // EFFECTS: returns a string telling the number, name and ranking of the driver.
     public String getInformation() {
-        return (number + ": " + name + " - " + ranking + "/5");
+        return (id + ": " + name + " - " + ranking + "/5");
     }
 
 }
