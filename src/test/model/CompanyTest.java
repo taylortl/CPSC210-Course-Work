@@ -77,9 +77,18 @@ public class CompanyTest {
     }
 
     @Test
-    public void testGetDriversWithinZonWithRides() {
+    public void testGetDriversWithinZoneWithRidesInBetweenDuration() {
         for (int i = 0 ; i < ourCompany.numberOfDrivers(); i++) {
             ourCompany.addRide(time + 1, start, end, i, additional);
+        }
+        List<String> driversAvailable= ourCompany.getDriversWithinZone(time, start, duration);
+        assertEquals(0,driversAvailable.size());
+    }
+
+    @Test
+    public void testGetDriversWithinZonWithRides() {
+        for (int i = 0 ; i < ourCompany.numberOfDrivers(); i++) {
+            ourCompany.addRide(time, start, end, i, additional);
         }
         List<String> driversAvailable= ourCompany.getDriversWithinZone(time, start, duration);
         assertEquals(0,driversAvailable.size());
@@ -91,9 +100,18 @@ public class CompanyTest {
         assertTrue(driversAvailable.size() > 0);
     }
     @Test
-    public void testGetDriversOutOfZoneWithRides() {
+    public void testGetDriversOutOfZoneWithRidesInBetweenDuration() {
         for (int i = 0 ; i < ourCompany.numberOfDrivers(); i++) {
             ourCompany.addRide(time + 1, start , end, i, additional);
+        }
+        List<String> driversAvailable = ourCompany.getDriversOutOfZone(time, start, duration);
+        assertEquals(0, driversAvailable.size());
+    }
+
+    @Test
+    public void testGetDriversOutOfZoneWithRides() {
+        for (int i = 0 ; i < ourCompany.numberOfDrivers(); i++) {
+            ourCompany.addRide(time, start , end, i, additional);
         }
         List<String> driversAvailable = ourCompany.getDriversOutOfZone(time, start, duration);
         assertEquals(0, driversAvailable.size());
@@ -123,7 +141,6 @@ public class CompanyTest {
         assertEquals(0, customer.numberOfRides());
         int bookAgain = ourCompany.addRide(time, start, end, driver, additional);
         assertTrue(bookAgain > 0);
-
     }
 
     @Test
@@ -134,7 +151,7 @@ public class CompanyTest {
 
     @Test
     public void getDriverZoneWithFakeDriver() {
-        int zone = ourCompany.getDriverZone(-1);
+        int zone = ourCompany.getDriverZone(ourCompany.numberOfDrivers());
         assertEquals(0, zone);
     }
 }

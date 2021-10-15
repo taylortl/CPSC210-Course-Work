@@ -78,6 +78,13 @@ public class CustomerTest {
     }
 
     @Test
+    public void testReviewWithReviewedRide() {
+        user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
+        user.changeReviewStateOfRide(0);
+        assertFalse(user.changeReviewStateOfRide(0));
+    }
+
+    @Test
     public void testRideHistoryWithoutRide() {
         List<String> history = user.getRideHistory();
         assertTrue(history.isEmpty());

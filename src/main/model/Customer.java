@@ -47,7 +47,7 @@ public class Customer {
     // REQUIRES: 0 <= rideReference < number of rides in the list
     // EFFECTS: return the time of the corresponding ride.
     public int getTimeOfRide(int rideReference) {
-        if (rideReference < 0 || rideReference >= rides.size()) {
+        if (rideReference >= rides.size()) {
             return -1;
         }
         return rides.get(rideReference).getTime();
@@ -58,6 +58,8 @@ public class Customer {
     // EFFECTS: return true if successfully review the ride.
     public boolean changeReviewStateOfRide(int rideReference) {
         if (rideReference < 0 || rideReference >= rides.size()) {
+            return false;
+        } else if (rides.get(rideReference).isReviewed()) {
             return false;
         }
         rides.get(rideReference).setReviewed();

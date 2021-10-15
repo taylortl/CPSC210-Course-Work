@@ -155,9 +155,7 @@ public class Company {
                  call the cancel function in Customer class to remove the ride.
      */
     public void cancellation(int driver, int time, int duration, int rideNumber) {
-        if (user.numberOfRides() > 0) {
-            user.cancel(rideNumber);
-            drivers.get(driver).availableAgain(time, duration);
-        }
+        user.cancel(rideNumber);
+        drivers.get(driver).availableAgain(time, duration);
     }
 }
