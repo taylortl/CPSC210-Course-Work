@@ -26,7 +26,7 @@ public class TaxiService {
     // EFFECTS: prints a menu of the application.
     private void printMenu() {
         System.out.println("---------------------------------------");
-        System.out.println("1. Write a review for the drivers.");
+        System.out.println("1. Rate the drivers.");
         System.out.println("2. Book a ride.");
         System.out.println("3. Cancel a ride.");
         System.out.println("4. View price");
@@ -87,7 +87,7 @@ public class TaxiService {
     // EFFECTS: prints a list of rides the user booked, rides that are cancelled or reviewed will not be shown.
     private boolean printRides() {
         List<String> rides = user.getRideHistory();
-        System.out.println("NOTE: RIDES THAT WERE REVIEWED OR CANCELLED WILL NOT BE SHOWN.");
+        System.out.println("NOTE: RIDES THAT WERE RATED OR CANCELLED WILL NOT BE SHOWN.");
         System.out.println();
         if (rides.isEmpty()) {
             return false;
@@ -114,19 +114,25 @@ public class TaxiService {
                 System.out.print("Please enter the reference number of the ride: ");
                 int reference = input.nextInt();
                 if (reference >= 0 && reference < user.numberOfRides()) {
-                    int driverOfRide = user.getDriverOfRide(reference);
-                    System.out.print("Rank from 0 - 5: ");
-                    double ranking = input.nextDouble();
-                    boolean success = kingdom.writeReview(reference, ranking, driverOfRide);
-                    if (success) {
-                        System.out.println("Thank you for your advice.");
-                    } else {
-                        incorrectInput();
-                    }
+                    doRating(reference);
                 } else {
                     incorrectInput();
                 }
             }
+        }
+    }
+
+    // REQUIRES: 0 <= reference < number of rides booked
+    // EFFECTS: prompt the user for the rank of the driver and do the rating.
+    private void doRating(int reference) {
+        int driverOfRide = user.getDriverOfRide(reference);
+        System.out.print("Rank from 0 - 5: ");
+        double rating = input.nextDouble();
+        boolean success = kingdom.writeReview(reference, rating, driverOfRide);
+        if (success) {
+            System.out.println("Thank you for your advice.");
+        } else {
+            incorrectInput();
         }
     }
 
@@ -156,19 +162,17 @@ public class TaxiService {
         }
     }
 
-    /*
-        REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1 <= destination <= 5, 1<= duration <=4
-        EFFECTS: add a booking.
-     */
+    // REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1 <= destination <= 5, 1<= duration <=4
+    // EFFECTS: add a booking.
     private void booking(int time, int start, int destination, int duration) {
         System.out.println("---------------------------------------");
         List<String> driversAvailable = kingdom.getDriversWithinZone(time, start, duration);
         if (driversAvailable.isEmpty()) {
             addFeeBooking(time, start, destination, duration);
         } else {
-            int chosenOne = choosingDriver(driversAvailable);
-            if (chosenOne >= 0) {
-                receipt(time, start, destination, chosenOne, 0);
+            int chosenDriver = choosingDriver(driversAvailable);
+            if (chosenDriver >= 0) {
+                receipt(time, start, destination, chosenDriver, 0);
             }
         }
     }
@@ -180,30 +184,26 @@ public class TaxiService {
         }
         System.out.println("---------------------------------------");
         System.out.print("Please choose the drivers from above, enter the number of the driver: ");
-        int selected = input.nextInt();
-        if (selected >= kingdom.numberOfDrivers() || selected < 0) {
+        int chosenDriver = input.nextInt();
+        if (chosenDriver >= kingdom.numberOfDrivers() || chosenDriver < 0) {
             incorrectInput();
-            selected = -1;
+            chosenDriver = -1;
         }
-        return selected;
+        return chosenDriver;
     }
 
-    /*
-        REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1 <= destination <= 5,
-                  0 <= drivers < number of drivers in the list, 1 <= additional <= 4
-        MODIFIES: make the Company to book a ride and print the receipt.
-     */
-    private void receipt(int time,int start,int destination,int selected,int additional) {
-        int cost = kingdom.addRide(time, start, destination, selected, additional);
+    // REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1 <= destination <= 5,
+    //           0 <= drivers < number of drivers in the list, 1 <= additional <= 4
+    // MODIFIES: make the Company to book a ride and print the receipt.
+    private void receipt(int time,int start,int destination,int chosenDriver,int additional) {
+        int cost = kingdom.addRide(time, start, destination, chosenDriver, additional);
         System.out.println("---------------------------------------");
         System.out.println("The cost of the ride is $ " + cost
                 + ", our driver will contact you soon.");
     }
 
-    /*
-        REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1 <= destination <= 5, 1 <= duration <= 4
-        EFFECTS: booking if there's no drivers in the starting zone.
-     */
+    //REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1 <= destination <= 5, 1 <= duration <= 4
+    // EFFECTS: booking if there's no drivers in the starting zone.
     private void addFeeBooking(int time, int start, int destination, int duration) {
         System.out.println("There's no driver available in the zone at that time. ");
         System.out.print("Would you like to choose drivers from other zones? (y/n)? ");
@@ -234,10 +234,10 @@ public class TaxiService {
             if (rides) {
                 System.out.print("Please enter the reference number of the ride: ");
                 int reference = input.nextInt();
-                if (reference >= user.numberOfRides() || reference < 0) {
-                    incorrectInput();
-                } else {
+                if (reference < user.numberOfRides() && reference >= 0) {
                     cancellation(reference);
+                } else {
+                   incorrectInput();
                 }
             } else {
                 System.out.println("Reviewed rides cannot be cancelled.");
@@ -245,22 +245,19 @@ public class TaxiService {
         }
     }
 
-    /*
-        REQUIRES: 0 <= rideNumber < number of rides booked
-        EFFECTS: cancel the chosen ride of the user
-     */
-    private void cancellation(int rideNumber) {
-        int cancelDriver = user.cancellable(rideNumber);
+    // REQUIRES: 0 <= rideNumber < number of rides booked
+    // EFFECTS: cancel the chosen ride of the user
+    private void cancellation(int reference) {
+        int cancelDriver = user.cancellable(reference);
         if (cancelDriver < 0) {
             System.out.println("Sorry, this booking cannot be cancelled.");
         } else {
-            int start = user.getStartOfRide(rideNumber);
-            int end = user.getEndOfRide(rideNumber);
-            int time = user.getTimeOfRide(rideNumber);
+            int start = user.getStartOfRide(reference);
+            int end = user.getEndOfRide(reference);
+            int time = user.getTimeOfRide(reference);
             int duration = abs(start - end) + 1;
-            kingdom.cancellation(cancelDriver, time, duration, rideNumber);
+            kingdom.cancellation(cancelDriver, time, duration, reference);
             System.out.println("Booking is cancelled, we hope to see you again.");
         }
     }
-
 }

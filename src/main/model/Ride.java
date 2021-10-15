@@ -20,10 +20,9 @@ public class Ride {
 
 
 
-    /*  REQUIRES: 0 <= driverNumber < the number of drivers in the list, 1 <= startZone <  5, 1 <= desZone <  5
-        EFFECTS: initialize all the data member, calculate the cost of this ride,
-                 assume that the ride doesn't cost any additional fee, create a reference number for this ride.
-    */
+    // REQUIRES: 0 <= driverNumber < the number of drivers in the list, 1 <= startZone <  5, 1 <= desZone <  5
+    // EFFECTS: initialize all the data member, calculate the cost of this ride,
+    //          assume that the ride doesn't cost any additional fee, create a reference number for this ride.
     public Ride(int driverNumber, String driverName, int startZone, int desZone, int time, int oneZone, int multiZone) {
         driver = driverNumber;
         this.driverName = driverName;

@@ -52,8 +52,8 @@ public class Company {
         drivers.add(new Driver("Martha", 5));
         drivers.add(new Driver("Jeremy", 1));
     }
-
-    /* REQUIRES: 0 <= reference < number of rides booked, 0<= ranking <=5,
+    /*
+       REQUIRES: 0 <= reference < number of rides booked, 0<= ranking <=5,
                  0 <= drivers < number of drivers in the list
        MODIFIES: this
        EFFECTS: changes the ranking of the driver according to the given ranking from user.
@@ -68,11 +68,9 @@ public class Company {
         return false;
     }
 
-    /*
-       REQUIRES: 0 <= time <= 23, 1 <= zone <= 5, 1<= duration <=4
-       EFFECTS: returns  a list of string, each containing information about the drivers.
-                It only includes drivers who are in the given zone at that time.
-    */
+    // REQUIRES: 0 <= time <= 23, 1 <= zone <= 5, 1<= duration <=4
+    // EFFECTS: returns  a list of string, each containing information about the drivers.
+    //          It only includes drivers who are in the given zone at that time.
     public List<String> getDriversWithinZone(int time, int zone, int duration) {
         ArrayList<String> driversAvailable = new ArrayList<>();
         boolean foundDrivers;
@@ -94,11 +92,9 @@ public class Company {
         return driversAvailable;
     }
 
-    /*
-       REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1<= duration <=4
-       EFFECTS: returns a list of string, each containing information about the drivers.
-                It includes drivers who are available at that time.
-    */
+    // REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1<= duration <=4
+    // EFFECTS: returns a list of string, each containing information about the drivers.
+    //          It includes drivers who are available at that time.
     public List<String> getDriversOutOfZone(int time, int start, int duration) {
         ArrayList<String> driversAvailable = new ArrayList<>();
         boolean foundDrivers;
@@ -121,23 +117,21 @@ public class Company {
         return driversAvailable;
     }
 
-    /*
-        REQUIRES: 0 <= driver < number of drivers created, 1 <= start <= 5
-        EFFECTS: returns the additional fee needed to book this driver.
-     */
+    // REQUIRES: 0 <= driver < number of drivers created, 1 <= start <= 5
+    // EFFECTS: returns the additional fee needed to book this driver.
     public int getAddedFee(int driver, int start) {
         int zone = getDriverZone(driver);
         return (ADDITIONAL_FEE * abs(zone - start));
     }
 
     /*
-            REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1 <= destination <= 5,
-                      0 <= selected < number of drivers created, 0 <= additional <= 4
-            MODIFIES: this
-            EFFECTS: add a ride to the list and change te availability of the driver,
-                     additional cost needed if origin and destination are not in the same zone,
-                     returns the cost of the added ride.
-         */
+       REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1 <= destination <= 5,
+                 0 <= selected < number of drivers created, 0 <= additional <= 4
+       MODIFIES: this
+       EFFECTS: add a ride to the list and change te availability of the driver,
+                additional cost needed if origin and destination are not in the same zone,
+                returns the cost of the added ride.
+    */
     public int addRide(int time, int start, int destination, int selected, int additional) {
         drivers.get(selected).changeAvailability(time, abs(start - destination) + 1, destination);
         String name = drivers.get(selected).getName();
@@ -145,11 +139,11 @@ public class Company {
     }
 
     /*
-        REQUIRES: 0 <= drivers < number of drivers in the list, 0 <= time <= 23,
-                  1<= duration <=4, 0 <= rideNumber < number of rides booked,
-        MODIFIES: this
-        EFFECTS: set the driver to be available in its original zone in that period.
-                 call the cancel function in Customer class to remove the ride.
+       REQUIRES: 0 <= drivers < number of drivers in the list, 0 <= time <= 23,
+                 1<= duration <=4, 0 <= rideNumber < number of rides booked,
+       MODIFIES: this
+       EFFECTS: set the driver to be available in its original zone in that period.
+                call the cancel function in Customer class to remove the ride.
      */
     public void cancellation(int driver, int time, int duration, int rideNumber) {
         user.cancel(rideNumber);
