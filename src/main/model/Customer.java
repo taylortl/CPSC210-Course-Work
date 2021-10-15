@@ -58,8 +58,7 @@ public class Customer {
         String information;
         for (int i = 0; i < rides.size(); i++) {
             if (!rides.get(i).isReviewed()) {
-                information = "";
-                information += i + ": ";
+                information = i + ": ";
                 information += rides.get(i).getDriverName() + " driving you ";
                 information += rides.get(i).getInformation();
                 outputInformation.add(information);

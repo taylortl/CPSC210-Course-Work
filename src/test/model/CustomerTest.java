@@ -99,9 +99,17 @@ public class CustomerTest {
     }
 
     @Test
-    public void testCancellableWithRide() {
+    public void testCancellableWithCancellableRide() {
         user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
         assertEquals(driver, user.cancellable(0));
+    }
+
+    @Test
+    public void testCancellableWithLongLiveRide() {
+        driver = start + 1;
+        additional = abs(driver - start);
+        user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
+        assertEquals(-1, user.cancellable(0));
     }
 
     @Test

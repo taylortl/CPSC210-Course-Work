@@ -1,6 +1,5 @@
 package ui;
 
-import jdk.nashorn.internal.ir.Symbol;
 import model.Company;
 import model.Customer;
 
