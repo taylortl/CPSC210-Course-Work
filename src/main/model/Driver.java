@@ -2,14 +2,12 @@ package model;
 
 import java.util.Arrays;
 
+// A driver with his/her name, his/her location (in terms of zone), his/her ranking initially set as 2.5/5
 public class Driver {
-    private static int driverNum = 0;
 
     private String name; // name of the driver
-    private int id; // number corresponding to the driver
     private int zone;
     private double ranking; // ranking of the driver
-    private int numberOfCustomers = 0;
     /* an array of numbers representing the location of the driver at that time
         eq: unavailable at 1pm -> availability[13] = 0
             available at 2pm in zone 3 -> availability[14] = 3
@@ -24,7 +22,6 @@ public class Driver {
                  give a number to this driver.
      */
     public Driver(String name, int zone) {
-        id = driverNum++;
         this.name = name;
         this.zone = zone;
         availability = new int[24];
@@ -33,10 +30,6 @@ public class Driver {
     }
 
     // Getters
-    public int getId() {
-        return id;
-    }
-
     public double getRanking() {
         return ranking;
     }
@@ -45,11 +38,15 @@ public class Driver {
         return name;
     }
 
+    public int getZone() {
+        return zone;
+    }
+
     /*
-        REQUIRES: 0 <= time <= 23
-        EFFECTS: returns 0 if the driver is not available at the given time.
-                 Else, returns the location (zone) of the driver at the given time.
-     */
+            REQUIRES: 0 <= time <= 23
+            EFFECTS: returns 0 if the driver is not available at the given time.
+                     Else, returns the location (zone) of the driver at the given time.
+         */
     public int getAvailability(int time) {
         return (availability[time]);
     }
@@ -69,7 +66,6 @@ public class Driver {
                 availability[i] = destination;
             }
         }
-
     }
 
     /*
@@ -93,9 +89,9 @@ public class Driver {
         ranking = (ranking + newRank) / 2;
     }
 
-    // EFFECTS: returns a string telling the number, name and ranking of the driver.
+    // EFFECTS: returns a string telling the name and ranking of the driver.
     public String getInformation() {
-        return (id + ": " + name + " - " + ranking + "/5");
+        return (name + " - " + ranking + "/5");
     }
 
 }
