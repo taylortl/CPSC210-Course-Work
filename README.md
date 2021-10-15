@@ -1,7 +1,7 @@
 # Taxi Service
 
 ## Ride booking system for a day 
-Author: Choi Ian Leong, Taylor
+**Author: Choi Ian Leong, Taylor**
 
 ***About This Application*** \
 The application provides a ride booking system for customers within 5 zones. 
@@ -31,6 +31,6 @@ As a user, I want to be able to book multiple rides on the day.\
 As a user, I want to be able to cancel the booking(s) of my ride(s).\
 As a user, I want to be able to give a review to my ride(s).\
 As a user, I want to be able to choose my own choice of driver.\
-As a user, I want to be able to look at the price table of the service.\
+As a user, I want to be able to look at the price table of the service.
 
 
