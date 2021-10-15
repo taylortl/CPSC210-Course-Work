@@ -17,38 +17,38 @@ public class Customer {
         return (rides.size());
     }
 
-    // REQUIRES: 0 <= rideReference < number of rides in the list
+    // REQUIRES: 0 <= reference < number of rides in the list
     // EFFECTS: return the driver of the corresponding ride.
-    public int getDriverOfRide(int rideReference) {
-        return rides.get(rideReference).getDriver();
+    public int getDriverOfRide(int reference) {
+        return rides.get(reference).getDriver();
     }
 
-    // REQUIRES: 0 <= rideReference < number of rides in the list
+    // REQUIRES: 0 <= reference < number of rides in the list
     // EFFECTS: return the starting zone of the corresponding ride.
-    public int getStartOfRide(int rideReference) {
-        return rides.get(rideReference).getStart();
+    public int getStartOfRide(int reference) {
+        return rides.get(reference).getStart();
     }
 
-    // REQUIRES: 0 <= rideReference < number of rides in the list
+    // REQUIRES: 0 <= reference < number of rides in the list
     // EFFECTS: return the destination of the corresponding ride.
-    public int getEndOfRide(int rideReference) {
-        return rides.get(rideReference).getDestination();
+    public int getEndOfRide(int reference) {
+        return rides.get(reference).getDestination();
     }
 
-    // REQUIRES: 0 <= rideReference < number of rides in the list
+    // REQUIRES: 0 <= reference < number of rides in the list
     // EFFECTS: return the time of the corresponding ride.
-    public int getTimeOfRide(int rideReference) {
-        return rides.get(rideReference).getTime();
+    public int getTimeOfRide(int reference) {
+        return rides.get(reference).getTime();
     }
 
-    // REQUIRES: 0 <= rideReference < number of rides in the list
+    // REQUIRES: 0 <= reference < number of rides in the list
     // MODIFIES: this
     // EFFECTS: return true if successfully review the ride.
-    public boolean changeReviewStateOfRide(int rideReference) {
-        if (rides.isEmpty() || rides.get(rideReference).isReviewed()) {
+    public boolean changeReviewStateOfRide(int reference) {
+        if (rides.isEmpty() || rides.get(reference).isReviewed()) {
             return false;
         }
-        rides.get(rideReference).setReviewed();
+        rides.get(reference).setReviewed();
         return true;
     }
 
@@ -83,18 +83,18 @@ public class Customer {
         return totalCost;
     }
 
-    // REQUIRES: 0 <= rideReference < number of rides in the list
+    // REQUIRES: 0 <= reference < number of rides in the list
     // EFFECTS: returns the driver number of the ride if it can be cancelled.
-    public int cancellable(int rideNumber) {
-        if (rides.isEmpty() || rides.get(rideNumber).getOtherZoneDriver()) {
+    public int cancellable(int reference) {
+        if (rides.isEmpty() || rides.get(reference).getOtherZoneDriver()) {
             return -1;
         }
-        return rides.get(rideNumber).getDriver();
+        return rides.get(reference).getDriver();
     }
 
-    // REQUIRES: 0 <= rideReference < number of rides in the list
+    // REQUIRES: 0 <= reference < number of rides in the list
     // EFFECTS: remove the given ride from the list.
-    public void cancel(int rideNumber) {
-        rides.remove(rideNumber);
+    public void cancel(int reference) {
+        rides.remove(reference);
     }
 }

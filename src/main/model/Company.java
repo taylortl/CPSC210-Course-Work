@@ -146,8 +146,8 @@ public class Company {
        EFFECTS: set the driver to be available in its original zone in that period.
                 call the cancel function in Customer class to remove the ride.
      */
-    public void cancellation(int driver, int time, int duration, int rideNumber) {
-        user.cancel(rideNumber);
+    public void cancellation(int driver, int time, int duration, int reference) {
+        user.cancel(reference);
         drivers.get(driver).availableAgain(time, duration);
     }
 }
