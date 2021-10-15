@@ -237,7 +237,7 @@ public class TaxiService {
                 if (reference < user.numberOfRides() && reference >= 0) {
                     cancellation(reference);
                 } else {
-                   incorrectInput();
+                    incorrectInput();
                 }
             } else {
                 System.out.println("Reviewed rides cannot be cancelled.");

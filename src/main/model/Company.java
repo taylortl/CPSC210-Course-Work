@@ -52,6 +52,7 @@ public class Company {
         drivers.add(new Driver("Martha", 5));
         drivers.add(new Driver("Jeremy", 1));
     }
+
     /*
        REQUIRES: 0 <= reference < number of rides booked, 0<= ranking <=5,
                  0 <= drivers < number of drivers in the list
