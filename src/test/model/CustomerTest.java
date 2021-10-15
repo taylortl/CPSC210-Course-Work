@@ -94,6 +94,14 @@ public class CustomerTest {
     }
 
     @Test
+    public void testRideHistoryWithReviewedRide() {
+        user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
+        user.changeReviewStateOfRide(0);
+        List<String> history = user.getRideHistory();
+        assertTrue(history.isEmpty());
+    }
+
+    @Test
     public void testCancellableWithoutRide() {
         assertEquals(-1, user.cancellable(0));
     }

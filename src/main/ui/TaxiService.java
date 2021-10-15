@@ -113,7 +113,7 @@ public class TaxiService {
             if (rides) {
                 System.out.print("Please enter the reference number of the ride: ");
                 int reference = input.nextInt();
-                if (reference > 0 && reference < user.numberOfRides()) {
+                if (reference >= 0 && reference < user.numberOfRides()) {
                     int driverOfRide = user.getDriverOfRide(reference);
                     System.out.print("Rank from 0 - 5: ");
                     double ranking = input.nextDouble();
