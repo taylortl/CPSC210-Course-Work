@@ -7,7 +7,7 @@ import static java.lang.Math.abs;
     The cost is calculated with zones and each ride is assigned to a reference number.
  */
 public class Ride {
-   private int driver; // driver of the ride (represented in his/her number)
+    private int driver; // driver of the ride (represented in his/her number)
     private String driverName;
     private int time; // starting time
     private int start; // zone of the starting position

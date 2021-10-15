@@ -68,7 +68,7 @@ public class Customer {
     public List<String> getRideHistory() {
         ArrayList<String> outputInformation = new ArrayList<>();
         String information;
-        for (int i = 0; i < rides.size() ;i++) {
+        for (int i = 0; i < rides.size(); i++) {
             if (!rides.get(i).isReviewed()) {
                 information = "";
                 information += i + ": ";
