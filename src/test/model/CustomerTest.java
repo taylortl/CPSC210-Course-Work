@@ -32,10 +32,6 @@ public class CustomerTest {
     @Test
     public void testConstructor() {
         assertEquals(0,user.numberOfRides());
-        assertEquals(-1, user.getTimeOfRide(0));
-        assertEquals(-1, user.getDriverOfRide(0));
-        assertEquals(0, user.getStartOfRide(0));
-        assertEquals(0, user.getEndOfRide(0));
     }
 
     @Test

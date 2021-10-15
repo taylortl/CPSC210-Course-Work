@@ -114,10 +114,8 @@ public class TaxiService {
             if (rides) {
                 System.out.print("Please enter the reference number of the ride: ");
                 int reference = input.nextInt();
-                int driverOfRide = user.getDriverOfRide(reference);
-                if (driverOfRide < 0) {
-                    incorrectInput();
-                } else {
+                if (reference > 0 && reference < user.numberOfRides()) {
+                    int driverOfRide = user.getDriverOfRide(reference);
                     System.out.print("Rank from 0 - 5: ");
                     double ranking = input.nextDouble();
                     boolean success = kingdom.writeReview(reference, ranking, driverOfRide);
@@ -126,6 +124,8 @@ public class TaxiService {
                     } else {
                         incorrectInput();
                     }
+                } else {
+                    incorrectInput();
                 }
             }
         }
@@ -216,13 +216,9 @@ public class TaxiService {
                 System.out.print("Sorry, there's no other drivers available at that time. We hope to see you again.");
             } else {
                 int chosenOne = choosingDriver(driversAvailable);
-                if (chosenOne >= 0) {
+                if (chosenOne >= 0 && chosenOne < kingdom.numberOfDrivers()) {
                     int driverZone = kingdom.getDriverZone(chosenOne);
-                    if (driverZone <= 0) {
-                        incorrectInput();
-                    } else {
-                        receipt(time, start, destination, chosenOne, abs(driverZone - start));
-                    }
+                    receipt(time, start, destination, chosenOne, abs(driverZone - start));
                 }
             }
         } else if (answer == 'n') {

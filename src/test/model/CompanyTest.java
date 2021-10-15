@@ -142,16 +142,4 @@ public class CompanyTest {
         int bookAgain = ourCompany.addRide(time, start, end, driver, additional);
         assertTrue(bookAgain > 0);
     }
-
-    @Test
-    public void getDriverZoneWithRealDriver() {
-        int zone = ourCompany.getDriverZone(0);
-        assertTrue(zone > 0);
-    }
-
-    @Test
-    public void getDriverZoneWithFakeDriver() {
-        int zone = ourCompany.getDriverZone(ourCompany.numberOfDrivers());
-        assertEquals(0, zone);
-    }
 }

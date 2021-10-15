@@ -38,9 +38,6 @@ public class Company {
     // REQUIRES: 0 <= driver < number of drivers in the list
     // EFFECTS: return the initial zone of the driver.
     public int getDriverZone(int driver) {
-        if (driver < 0 || driver >= drivers.size()) {
-            return 0;
-        }
         return drivers.get(driver).getZone();
     }
 

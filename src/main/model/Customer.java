@@ -20,36 +20,24 @@ public class Customer {
     // REQUIRES: 0 <= rideReference < number of rides in the list
     // EFFECTS: return the driver of the corresponding ride.
     public int getDriverOfRide(int rideReference) {
-        if (rideReference < 0 || rideReference >= rides.size()) {
-            return -1;
-        }
         return rides.get(rideReference).getDriver();
     }
 
     // REQUIRES: 0 <= rideReference < number of rides in the list
     // EFFECTS: return the starting zone of the corresponding ride.
     public int getStartOfRide(int rideReference) {
-        if (rideReference < 0 || rideReference >= rides.size()) {
-            return 0;
-        }
         return rides.get(rideReference).getStart();
     }
 
     // REQUIRES: 0 <= rideReference < number of rides in the list
     // EFFECTS: return the destination of the corresponding ride.
     public int getEndOfRide(int rideReference) {
-        if (rideReference < 0 || rideReference >= rides.size()) {
-            return 0;
-        }
         return rides.get(rideReference).getDestination();
     }
 
     // REQUIRES: 0 <= rideReference < number of rides in the list
     // EFFECTS: return the time of the corresponding ride.
     public int getTimeOfRide(int rideReference) {
-        if (rideReference >= rides.size()) {
-            return -1;
-        }
         return rides.get(rideReference).getTime();
     }
 
@@ -57,9 +45,7 @@ public class Customer {
     // MODIFIES: this
     // EFFECTS: return true if successfully review the ride.
     public boolean changeReviewStateOfRide(int rideReference) {
-        if (rideReference < 0 || rideReference >= rides.size()) {
-            return false;
-        } else if (rides.get(rideReference).isReviewed()) {
+        if (rides.isEmpty() || rides.get(rideReference).isReviewed()) {
             return false;
         }
         rides.get(rideReference).setReviewed();
@@ -101,7 +87,7 @@ public class Customer {
     // REQUIRES: 0 <= rideReference < number of rides in the list
     // EFFECTS: returns the driver number of the ride if it can be cancelled.
     public int cancellable(int rideNumber) {
-        if (rideNumber < 0 || rideNumber >= rides.size()) {
+        if (rides.isEmpty() || rides.get(rideNumber).getOtherZoneDriver()) {
             return -1;
         }
         return rides.get(rideNumber).getDriver();
@@ -110,8 +96,6 @@ public class Customer {
     // REQUIRES: 0 <= rideReference < number of rides in the list
     // EFFECTS: remove the given ride from the list.
     public void cancel(int rideNumber) {
-        if (rideNumber >= 0 && rideNumber < rides.size()) {
-            rides.remove(rideNumber);
-        }
+        rides.remove(rideNumber);
     }
 }
