@@ -8,10 +8,10 @@ The application provides a ride booking system for customers within 5 zones.
 The bookings can only be made on the same day and fees are charged according to the distance between zones. 
 Distance and duration of ride is determined by the difference of zone number.
 A ride within one zone takes 1 hour, ride between zones takes (1 + difference) hours. 
-Booking can only be cancelled if the driver is in the starting zone before the ride and the booking is not reviewed.
+Booking can only be cancelled if the driver is in the starting zone before the ride and the booking is not rated.
 In other words, if the user is choosing a driver from another zone, that ride cannot be cancelled.
 
-This application is different from other ride service, customers get to choose the drivers on their own according to the ranking of drivers.
+This application is different from other ride service, customers get to choose the drivers on their own according to the rating of drivers.
 If there's no drivers available in the zone, customer can choose a driver from another zone. 
 However, choosing drivers from other zone will cost additional fee and cannot be cancelled.
 This application is provided for all individuals living within the 5 zones.

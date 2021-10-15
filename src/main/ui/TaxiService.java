@@ -128,7 +128,7 @@ public class TaxiService {
         int driverOfRide = user.getDriverOfRide(reference);
         System.out.print("Rank from 0 - 5: ");
         double rating = input.nextDouble();
-        boolean success = kingdom.writeReview(reference, rating, driverOfRide);
+        boolean success = kingdom.rateDriver(reference, rating, driverOfRide);
         if (success) {
             System.out.println("Thank you for your advice.");
         } else {

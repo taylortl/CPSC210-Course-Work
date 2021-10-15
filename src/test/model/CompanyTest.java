@@ -57,12 +57,12 @@ public class CompanyTest {
         int reference = customer.numberOfRides() - 1;
         int driver = customer.getDriverOfRide(reference);
         double ranking = 4.25;
-        assertTrue(ourCompany.writeReview(reference, ranking, driver));
+        assertTrue(ourCompany.rateDriver(reference, ranking, driver));
     }
 
     @Test
     public void testWriteReviewWithoutRide() {
-        assertFalse(ourCompany.writeReview(0, 4.5, driver));
+        assertFalse(ourCompany.rateDriver(0, 4.5, driver));
     }
 
     @Test

@@ -59,7 +59,7 @@ public class Company {
        EFFECTS: changes the ranking of the driver according to the given ranking from user.
                 Returns true if successfully review the ride.
      */
-    public boolean writeReview(int reference, double ranking, int driver) {
+    public boolean rateDriver(int reference, double ranking, int driver) {
         boolean success = user.changeReviewStateOfRide(reference);
         if (success) {
             drivers.get(driver).changeRanking(ranking);
