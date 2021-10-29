@@ -67,13 +67,14 @@ public class JsonReader {
 
     // MODIFIES: company
     // EFFECTS: parses ride from JSON object and adds it to company
-    private void addRide(Company company, JSONObject customerJson) {
-        int driverNum = customerJson.getInt("driver");
-        int time = customerJson.getInt("startTime");
-        int startZone = customerJson.getInt("startZone");
-        int destination = customerJson.getInt("destination");
-        int additionalFee = customerJson.getInt("additionalFee");
-        company.addRide(time, startZone, destination, driverNum, additionalFee);
+    private void addRide(Company company, JSONObject rideJson) {
+        int driverNum = rideJson.getInt("driver");
+        int time = rideJson.getInt("startTime");
+        int startZone = rideJson.getInt("startZone");
+        int destination = rideJson.getInt("destination");
+        int additionalFee = rideJson.getInt("additionalFee");
+        boolean reviewed = rideJson.getBoolean("reviewed");
+        company.addOldRide(time, startZone, destination, driverNum, additionalFee, reviewed);
     }
 
 }

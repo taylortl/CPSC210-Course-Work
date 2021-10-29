@@ -18,7 +18,7 @@ public class RideTest {
 
     @BeforeEach
     public void setUp() {
-        numberOne = new Ride(driver, name, start, end, time, withinZoneCost, multiZonesCost);
+        numberOne = new Ride(driver, name, start, end, time, withinZoneCost, multiZonesCost, false);
     }
 
     @Test

@@ -1,9 +1,6 @@
 package ui;
 
-import exceptions.OutOfBoundInput;
-import exceptions.ReviewedRideException;
-import exceptions.RideCannotBeCancelled;
-import exceptions.WrongRideInput;
+import exceptions.*;
 import model.Company;
 import model.Customer;
 import persistence.JsonReader;
@@ -69,13 +66,15 @@ public class TaxiService {
                     doJobs(option);
                 } catch (OutOfBoundInput e) {
                     incorrectInput();
+                } catch (DriversOffWork driversOffWork) {
+                    System.out.println("Sorry, our drivers off at 23:00, we cannot provide service later than that.");
                 }
             }
         }
     }
 
     // EFFECTS: processes the option of the user.
-    private void doJobs(int option) throws OutOfBoundInput {
+    private void doJobs(int option) throws OutOfBoundInput, DriversOffWork {
         System.out.println("---------------------------------------");
         switch (option) {
             case 1:
@@ -119,6 +118,7 @@ public class TaxiService {
             for (String r : rides) {
                 System.out.println(r);
             }
+            System.out.println("---------------------------------------");
             return true;
         }
 
@@ -167,10 +167,11 @@ public class TaxiService {
             throw new OutOfBoundInput();
         }
         kingdom.rateDriver(reference, rating, driverOfRide);
+        System.out.println("Thank you for your advice ;)");
     }
 
     // EFFECTS: prompts the user for time, origin, destination of the ride for booking.
-    private void option2() throws OutOfBoundInput {
+    private void option2() throws OutOfBoundInput, DriversOffWork {
         boolean correctInput = true;
         System.out.print("Please enter the time of your appointment(0-23): ");
         int time = input.nextInt();
@@ -182,6 +183,9 @@ public class TaxiService {
         if (time > 23 || time < 0 || start > 5 || start < 1
                 || destination > 5 || destination < 1) {
             throw new OutOfBoundInput();
+        }
+        if (time + duration > 23) {
+            throw new DriversOffWork();
         }
         booking(time, start, destination, duration);
     }

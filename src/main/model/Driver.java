@@ -53,7 +53,7 @@ public class Driver {
     }
 
     /*
-        REQUIRES: 0 <= time <= 23, 1 <= destination <= 5
+        REQUIRES: 0 <= time <= 22, 1 <= destination <= 5
         MODIFIES: this
         EFFECTS: driver becomes unavailable during a ride,
                  and the driver's location is changed to the destination after the ride.

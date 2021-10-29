@@ -1,7 +1,34 @@
-{"customer": {"rides": [{
-  "additionalFee": 0,
-  "driver": 2,
-  "startZone": 3,
-  "destination": 3,
-  "startTime": 4
-}]}}
+{"customer": {"rides": [
+    {
+        "additionalFee": 0,
+        "driver": 5,
+        "startZone": 1,
+        "destination": 5,
+        "reviewed": false,
+        "startTime": 0
+    },
+    {
+        "additionalFee": 0,
+        "driver": 0,
+        "startZone": 1,
+        "destination": 1,
+        "reviewed": false,
+        "startTime": 0
+    },
+    {
+        "additionalFee": 0,
+        "driver": 4,
+        "startZone": 5,
+        "destination": 5,
+        "reviewed": false,
+        "startTime": 4
+    },
+    {
+        "additionalFee": 0,
+        "driver": 3,
+        "startZone": 4,
+        "destination": 2,
+        "reviewed": false,
+        "startTime": 13
+    }
+]}}

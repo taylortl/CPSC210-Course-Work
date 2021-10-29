@@ -24,12 +24,22 @@ public class Ride implements Writable {
 
 
     // REQUIRES: 0 <= driverNumber < the number of drivers in the list, 1 <= startZone <  5, 1 <= desZone <  5
-    //           oneZone > 0, multiZone > 0
+    //           0 <= time <= 22, oneZone > 0, multiZone > 0
     // EFFECTS: initializes all the data member
     //          calculate the cost of this ride,
     //          assumes that the ride doesn't cost any additional fee
     //          create a reference number for this ride.
-    public Ride(int driverNumber, String driverName, int startZone, int desZone, int time, int oneZone, int multiZone) {
+    public Ride(int driverNumber, String driverName, int startZone, int desZone, int time,
+                int oneZone, int multiZone, boolean reviewed) {
+        setUp(driverNumber, driverName, startZone, desZone, time, oneZone, multiZone, reviewed);
+    }
+    public Ride(int driverNumber, String driverName, int startZone, int desZone, int time,
+                int oneZone, int multiZone) {
+        setUp(driverNumber, driverName, startZone, desZone, time, oneZone, multiZone, false);
+    }
+
+    private void setUp(int driverNumber, String driverName, int startZone, int desZone, int time,
+                       int oneZone, int multiZone, boolean reviewed) {
         driver = driverNumber;
         this.driverName = driverName;
         start = startZone;
@@ -39,7 +49,7 @@ public class Ride implements Writable {
         additionalFee = multiZone;
         totalCost = withinZoneFee + abs(start - destination) * additionalFee;
         otherZoneDriver = 0;
-        reviewed = false;
+        this.reviewed = reviewed;
     }
 
     // Getters
@@ -87,9 +97,10 @@ public class Ride implements Writable {
         otherZoneDriver = times;
     }
 
-    // EFFECTS: returns a string about the origin and destination of the ride.
+    // EFFECTS: returns a string about the information of the ride.
     public String getInformation() {
-        return ("from zone " + start + " to zone " + destination);
+
+        return ("from zone " + start + " to zone " + destination + " at " + time + ":00");
     }
 
     @Override
@@ -100,7 +111,7 @@ public class Ride implements Writable {
         json.put("startZone", start);
         json.put("destination", destination);
         json.put("additionalFee", otherZoneDriver);
-
+        json.put("reviewed", reviewed);
         return json;
     }
 

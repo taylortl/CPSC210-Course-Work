@@ -74,15 +74,21 @@ public class Customer implements Writable {
     }
 
     /*
-        REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1 <= destination <= 5,
+        REQUIRES: 0 <= time <= 22, 1 <= start <= 5, 1 <= destination <= 5,
                   0 <= selected < number of drivers created, 0 <= additional <= 4
         MODIFIES: this
         EFFECTS: adds a ride to the list
                  adds the additional fee if given.
                  returns the cost of the ride.
      */
-    public int addRide(int time, int start, int end, int selected, int additional, String name, int cost, int fee) {
-        Ride newRide = new Ride(selected, name, start, end, time, cost, fee);
+    public int addRide(int time, int start, int end, int selected, int additional,
+                       String name, int cost, int fee) {
+        return addOldRide(time, start, end, selected, additional, name, cost, fee, false);
+    }
+
+    public int addOldRide(int time, int start, int end, int selected, int additional,
+                       String name, int cost, int fee, boolean reviewed) {
+        Ride newRide = new Ride(selected, name, start, end, time, cost, fee, reviewed);
         if (additional > 0) {
             newRide.addFee(additional);
         }

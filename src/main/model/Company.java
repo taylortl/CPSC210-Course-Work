@@ -74,7 +74,7 @@ public class Company implements Writable {
         drivers.get(driver).changeRating(rating);
     }
 
-    // REQUIRES: 0 <= time <= 23, 1 <= zone <= 5
+    // REQUIRES: 0 <= time <= 22, 1 <= zone <= 5
     // EFFECTS: returns  a list of string, each containing information about the drivers.
     //          It only includes drivers who are available in the given zone at that time.
     public List<String> getDriversWithinZone(int time, int zone, int duration) {
@@ -98,7 +98,8 @@ public class Company implements Writable {
         return driversAvailable;
     }
 
-    // REQUIRES: 0 <= time <= 23, 1 <= zone <= 5
+
+    // REQUIRES: 0 <= time <= 22, 1 <= zone <= 5
     // EFFECTS: returns a list of string, each containing information about the drivers.
     //          It includes drivers who are available in any zone at that time.
     public List<String> getDriversOutOfZone(int time, int start, int duration) {
@@ -131,7 +132,7 @@ public class Company implements Writable {
     }
 
     /*
-       REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1 <= destination <= 5,
+       REQUIRES: 0 <= time <= 22, 1 <= start <= 5, 1 <= destination <= 5,
                  0 <= selected < number of drivers created, 0 <= additional <= 4
        MODIFIES: this
        EFFECTS: adds a ride to the list
@@ -140,13 +141,27 @@ public class Company implements Writable {
                 returns the cost of the added ride.
     */
     public int addRide(int time, int start, int destination, int selected, int additional) {
-        drivers.get(selected).changeAvailability(time, abs(start - destination) + 1, destination);
-        String name = drivers.get(selected).getName();
-        return user.addRide(time, start, destination, selected, additional, name, ONE_ZONE_COST, ADDITIONAL_FEE);
+        return addOldRide(time, start, destination, selected, additional, false);
     }
 
     /*
-       REQUIRES: 0 <= drivers < number of drivers in the list, 0 <= time <= 23,
+       REQUIRES: 0 <= time <= 22, 1 <= start <= 5, 1 <= destination <= 5,
+                 0 <= selected < number of drivers created, 0 <= additional <= 4
+       MODIFIES: this
+       EFFECTS: adds a ride to the list
+                changes te availability of the driver,
+                additional cost needed for cross-zones rides,
+                returns the cost of the added ride.
+    */
+    public int addOldRide(int time, int start, int destination, int selected, int additional, boolean reviewed) {
+        drivers.get(selected).changeAvailability(time, abs(start - destination) + 1, destination);
+        String name = drivers.get(selected).getName();
+        return user.addOldRide(time, start, destination, selected, additional, name,
+                ONE_ZONE_COST, ADDITIONAL_FEE, reviewed);
+    }
+
+    /*
+       REQUIRES: 0 <= drivers < number of drivers in the list, 0 <= time <= 22,
                  0 <= rideNumber < number of rides booked,
        MODIFIES: this
        EFFECTS: sets the driver to be available in its original zone during that period.
