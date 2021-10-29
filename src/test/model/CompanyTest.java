@@ -177,7 +177,7 @@ public class CompanyTest {
 
     @Test
     public void testCancellationCrossZoneRide() {
-        // add a ride
+        // add a cross-zones ride
         driver = start + 1;
         additional = abs(driver - start);
         ourCompany.addRide(time, start, end, driver, additional);
@@ -195,11 +195,15 @@ public class CompanyTest {
 
     @Test
     public void testCancellationNormalRide() {
-        // add a ride
-        ourCompany.addRide(time, start, end, start, additional);
-        // review the ride
+        // add a within-zone ride
+        for (int i = 0 ; i < ourCompany.numberOfDrivers() ; i++) {
+            if (ourCompany.getDriverZone(i) == start) {
+                driver = i;
+            }
+        }
+        ourCompany.addRide(time, start, end, driver, 0);
         try {
-            ourCompany.cancellation(start, time, duration, customer.numberOfRides() - 1);
+            ourCompany.cancellation(start, time, duration, 0);
         } catch (ReviewedRideException e) {
             fail("There should be no ReviewedRideException");
         } catch (RideCannotBeCancelled e) {

@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class RideTest {
     private Ride numberOne;
+    private Ride numberTwo;
     private int driver = 5;
     private String name = "Tyson";
     private int start = 2;
@@ -18,11 +19,12 @@ public class RideTest {
 
     @BeforeEach
     public void setUp() {
-        numberOne = new Ride(driver, name, start, end, time, withinZoneCost, multiZonesCost, false);
+        numberOne = new Ride(driver, name, start, end, time, withinZoneCost, multiZonesCost);
+        numberTwo = new Ride(driver, name, start, end, time, withinZoneCost, multiZonesCost, true);
     }
 
     @Test
-    public void testConstructor() {
+    public void testConstructor1() {
         assertEquals(driver, numberOne.getDriver());
         assertEquals(name, numberOne.getDriverName());
         assertEquals(start, numberOne.getStart());
@@ -32,6 +34,19 @@ public class RideTest {
         assertEquals((withinZoneCost + (end - start) * multiZonesCost), numberOne.getTotalCost());
         assertFalse(numberOne.isReviewed());
         assertEquals(0, numberOne.getOtherZoneDriver());
+    }
+
+    @Test
+    public void testConstructor2() {
+        assertEquals(driver, numberTwo.getDriver());
+        assertEquals(name, numberTwo.getDriverName());
+        assertEquals(start, numberTwo.getStart());
+        assertEquals(end, numberTwo.getDestination());
+        assertEquals(time, numberTwo.getTime());
+        assertEquals(start, numberTwo.getStart());
+        assertEquals((withinZoneCost + (end - start) * multiZonesCost), numberTwo.getTotalCost());
+        assertTrue(numberTwo.isReviewed());
+        assertEquals(0, numberTwo.getOtherZoneDriver());
     }
 
     @Test
@@ -45,7 +60,7 @@ public class RideTest {
 
     @Test
     public void testGetInformation() {
-        String expected = "from zone " + start + " to zone " + end;
+        String expected = "from zone " + start + " to zone " + end + " at " + time + ":00";
         assertEquals(expected, numberOne.getInformation());
     }
 

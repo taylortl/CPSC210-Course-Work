@@ -33,6 +33,7 @@ public class Ride implements Writable {
                 int oneZone, int multiZone, boolean reviewed) {
         setUp(driverNumber, driverName, startZone, desZone, time, oneZone, multiZone, reviewed);
     }
+
     public Ride(int driverNumber, String driverName, int startZone, int desZone, int time,
                 int oneZone, int multiZone) {
         setUp(driverNumber, driverName, startZone, desZone, time, oneZone, multiZone, false);
