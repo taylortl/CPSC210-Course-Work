@@ -1,6 +1,6 @@
 package model;
 
-import exceptions.OutOfBoundInput;
+import exceptions.DriversOffWork;
 import exceptions.ReviewedRideException;
 import exceptions.RideCannotBeCancelled;
 import org.json.JSONObject;
@@ -89,9 +89,13 @@ public class CompanyTest {
     @Test
     public void testGetDriversWithinZonWithoutRides() {
         List<String> driversAvailable;
-        for (int i = 1; i < 6; i++) {
-            driversAvailable= ourCompany.getDriversWithinZone(time, i, duration);
-            assertTrue(driversAvailable.size() > 0);
+        try {
+            for (int i = 1; i < 6; i++) {
+                driversAvailable = ourCompany.getDriversWithinZone(time, i, duration);
+                assertTrue(driversAvailable.size() > 0);
+            }
+        } catch (DriversOffWork e) {
+            fail("There should be no DriversOffWork Exception");
         }
     }
 
@@ -100,32 +104,62 @@ public class CompanyTest {
         for (int i = 0 ; i < ourCompany.numberOfDrivers(); i++) {
             ourCompany.addRide(time + 1, start, end, i, additional);
         }
-        List<String> driversAvailable = ourCompany.getDriversWithinZone(time, start, duration);
-        assertEquals(0,driversAvailable.size());
+        try {
+            List<String> driversAvailable = ourCompany.getDriversWithinZone(time, start, duration);
+            assertEquals(0,driversAvailable.size());
+        } catch (DriversOffWork e) {
+            fail("There should be no DriversOffWork Exception");
+        }
+
 
     }
 
     @Test
-    public void testGetDriversWithinZonWithRides() {
+    public void testGetDriversWithinZoneWithRides() {
         for (int i = 0 ; i < ourCompany.numberOfDrivers(); i++) {
             ourCompany.addRide(time, start, end, i, additional);
         }
-        List<String> driversAvailable= ourCompany.getDriversWithinZone(time, start, duration);
-        assertEquals(0,driversAvailable.size());
+        try {
+            List<String> driversAvailable = ourCompany.getDriversWithinZone(time, start, duration);
+            assertEquals(0,driversAvailable.size());
+        } catch (DriversOffWork e) {
+            fail("There should be no DriversOffWork Exception");
+        }
+
+    }
+
+    @Test
+    public void testGetDriversWithinZoneForLateRides() {
+        time = 23;
+        try {
+            List<String> driversAvailable = ourCompany.getDriversWithinZone(time, start, duration);
+            fail("DriversOffWork Exception should occurred");
+        } catch (DriversOffWork e) {
+           // correct
+        }
     }
 
     @Test
     public void testGetDriversOutOfZoneWithoutRides() {
-        List<String> driversAvailable = ourCompany.getDriversOutOfZone(time, start, duration);
-        assertTrue(driversAvailable.size() > 0);
+        try {
+            List<String> driversAvailable = ourCompany.getDriversOutOfZone(time, start, duration);
+            assertTrue(driversAvailable.size() > 0);
+        } catch (DriversOffWork e) {
+            fail("There should be no DriversOffWork Exception");
+        }
+
     }
     @Test
     public void testGetDriversOutOfZoneWithRidesInBetweenDuration() {
         for (int i = 0 ; i < ourCompany.numberOfDrivers(); i++) {
             ourCompany.addRide(time + 1, start , end, i, additional);
         }
-        List<String> driversAvailable = ourCompany.getDriversOutOfZone(time, start, duration);
-        assertEquals(0, driversAvailable.size());
+        try {
+            List<String> driversAvailable = ourCompany.getDriversOutOfZone(time, start, duration);
+            assertEquals(0, driversAvailable.size());
+        } catch (DriversOffWork e) {
+            fail("There should be no DriversOffWork Exception");
+        }
     }
 
     @Test
@@ -133,8 +167,23 @@ public class CompanyTest {
         for (int i = 0 ; i < ourCompany.numberOfDrivers(); i++) {
             ourCompany.addRide(time, start , end, i, additional);
         }
-        List<String> driversAvailable = ourCompany.getDriversOutOfZone(time, start, duration);
-        assertEquals(0, driversAvailable.size());
+        try {
+            List<String> driversAvailable = ourCompany.getDriversOutOfZone(time, start, duration);
+            assertEquals(0, driversAvailable.size());
+        } catch (DriversOffWork e) {
+            fail("There should be no DriversOffWork Exception");
+        }
+    }
+
+    @Test
+    public void testGetDriversOutOfZoneForLateRides() {
+        time = 23;
+        try {
+            List<String> driversAvailable = ourCompany.getDriversOutOfZone(time, start, duration);
+            fail("DriversOffWork Exception should occurred");
+        } catch (DriversOffWork e) {
+            // correct
+        }
     }
 
     @Test

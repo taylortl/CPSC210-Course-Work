@@ -1,5 +1,6 @@
 package model;
 
+import exceptions.DriversOffWork;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import persistence.JsonReader;
@@ -59,6 +60,8 @@ public class JsonWriterTest extends JsonTest {
             checkCompany(loadedCompany, 0, 0, 1, 22, loadedCompany.numberOfDrivers());
         } catch (IOException e) {
             fail("There should be no IOException");
+        } catch (DriversOffWork driversOffWork) {
+            fail("There should be no DriversOffWork Exception");
         }
     }
 
@@ -78,7 +81,9 @@ public class JsonWriterTest extends JsonTest {
             List<String> driversAvailable = loadedCompany.getDriversWithinZone(time, start, abs(start - end));
             assertEquals(0, driversAvailable.size());
         } catch (IOException e) {
-            fail("Exception should not have been thrown");
+            fail("There should be no IOException");
+        } catch (DriversOffWork driversOffWork) {
+            fail("There should be no DriversOffWork Exception");
         }
     }
 

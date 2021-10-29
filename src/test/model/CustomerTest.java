@@ -1,6 +1,5 @@
 package model;
 
-import exceptions.OutOfBoundInput;
 import exceptions.ReviewedRideException;
 import exceptions.RideCannotBeCancelled;
 import org.json.JSONArray;

@@ -4,12 +4,20 @@ import exceptions.ReviewedRideException;
 import exceptions.RideCannotBeCancelled;
 import org.json.JSONObject;
 import persistence.Writable;
+import exceptions.DriversOffWork;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Math.abs;
 
+/******************************************
+ *    Title: JsonSerializationDemo
+ *    Author: Paul Carter
+ *    Date: 2021-03-07
+ *    Location: https://github.students.cs.ubc.ca/CPSC210/JsonSerializationDemo
+ *
+ ******************************************/
 /*
     Represents the company of the taxi service system:
     The booking system is for a single day only.
@@ -77,7 +85,10 @@ public class Company implements Writable {
     // REQUIRES: 0 <= time <= 22, 1 <= zone <= 5
     // EFFECTS: returns  a list of string, each containing information about the drivers.
     //          It only includes drivers who are available in the given zone at that time.
-    public List<String> getDriversWithinZone(int time, int zone, int duration) {
+    public List<String> getDriversWithinZone(int time, int zone, int duration) throws DriversOffWork {
+        if (time + duration > 23) {
+            throw new DriversOffWork();
+        }
         ArrayList<String> driversAvailable = new ArrayList<>();
         boolean foundDrivers;
         String driverInfo;
@@ -102,7 +113,10 @@ public class Company implements Writable {
     // REQUIRES: 0 <= time <= 22, 1 <= zone <= 5
     // EFFECTS: returns a list of string, each containing information about the drivers.
     //          It includes drivers who are available in any zone at that time.
-    public List<String> getDriversOutOfZone(int time, int start, int duration) {
+    public List<String> getDriversOutOfZone(int time, int start, int duration) throws DriversOffWork {
+        if (time + duration > 23) {
+            throw new DriversOffWork();
+        }
         ArrayList<String> driversAvailable = new ArrayList<>();
         boolean foundDrivers;
         String driverInfo;

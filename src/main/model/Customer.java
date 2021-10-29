@@ -9,6 +9,13 @@ import persistence.Writable;
 import java.util.ArrayList;
 import java.util.List;
 
+/******************************************
+ *    Title: JsonSerializationDemo
+ *    Author: Paul Carter
+ *    Date: 2021-03-07
+ *    Location: https://github.students.cs.ubc.ca/CPSC210/JsonSerializationDemo
+ *
+ ******************************************/
 // Represents a customer booking rides from the company
 public class Customer implements Writable {
     private List<Ride> rides; // ride history of the customer

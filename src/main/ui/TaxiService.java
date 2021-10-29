@@ -5,6 +5,8 @@ import model.Company;
 import model.Customer;
 import persistence.JsonReader;
 import persistence.JsonWriter;
+import exceptions.DriversOffWork;
+import ui.exceptions.OutOfBoundInput;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -13,6 +15,13 @@ import java.util.Scanner;
 
 import static java.lang.Math.abs;
 
+/******************************************
+ *    Title: JsonSerializationDemo
+ *    Author: Paul Carter
+ *    Date: 2021-03-07
+ *    Location: https://github.students.cs.ubc.ca/CPSC210/JsonSerializationDemo
+ *
+ ******************************************/
 // A user interface class that prompt for values for the ride booking system.
 public class TaxiService {
     private static final String JSON_FILE = "./data/kingdom.json";
@@ -184,14 +193,11 @@ public class TaxiService {
                 || destination > 5 || destination < 1) {
             throw new OutOfBoundInput();
         }
-        if (time + duration > 23) {
-            throw new DriversOffWork();
-        }
         booking(time, start, destination, duration);
     }
 
     // EFFECTS: adds a booking to the customer serving.
-    private void booking(int time, int start, int destination, int duration) throws OutOfBoundInput {
+    private void booking(int time, int start, int destination, int duration) throws OutOfBoundInput, DriversOffWork {
         System.out.println("---------------------------------------");
         List<String> driversAvailable = kingdom.getDriversWithinZone(time, start, duration);
         if (driversAvailable.isEmpty()) {
@@ -225,7 +231,8 @@ public class TaxiService {
     }
 
     // EFFECTS: adds booking if there's no drivers in the starting zone.
-    private void addFeeBooking(int time, int start, int destination, int duration) throws OutOfBoundInput {
+    private void addFeeBooking(int time, int start, int destination, int duration)
+            throws OutOfBoundInput, DriversOffWork {
         System.out.println("There's no driver available in the zone at that time. ");
         System.out.print("Would you like to choose drivers from other zones? (y/n)? ");
         input.nextLine();
