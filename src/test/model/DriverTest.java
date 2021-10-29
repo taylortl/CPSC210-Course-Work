@@ -20,7 +20,7 @@ class DriverTest {
     public void testConstructor() {
         assertEquals(name, numberOne.getName());
         assertEquals(ZONE, numberOne.getZone());
-        assertEquals(2.5, numberOne.getRanking());
+        assertEquals(2.5, numberOne.getRating());
         for (int i = 0; i < 24; i++) {
             assertEquals(5, numberOne.getAvailability(i));
         }
@@ -113,13 +113,13 @@ class DriverTest {
 
     @Test
     public void testChangeRanking() {
-        numberOne.changeRanking(5);
-        assertEquals((2.5 + 5) / 2 , numberOne.getRanking());
+        numberOne.changeRating(5);
+        assertEquals((2.5 + 5) / 2 , numberOne.getRating());
     }
 
     @Test
     public void testGetInformation() {
-        String expected = name + " - " + numberOne.getRanking() + "/5";
+        String expected = name + " - " + numberOne.getRating() + "/5";
         assertEquals(expected, numberOne.getInformation());
     }
 }

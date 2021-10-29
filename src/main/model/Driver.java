@@ -2,12 +2,13 @@ package model;
 
 import java.util.Arrays;
 
-// A driver with his/her name, his/her location (in terms of zone), his/her ranking initially set as 2.5/5
+// Represents a driver with his/her rating initially set as 2.5/
 public class Driver {
 
-    private String name; // name of the driver
+    private String name;
     private int zone;
-    private double ranking; // ranking of the driver
+    private double rating;
+
     /* an array of numbers representing the location of the driver at that time
         eq: unavailable at 1pm -> availability[13] = 0
             available at 2pm in zone 3 -> availability[14] = 3
@@ -16,22 +17,22 @@ public class Driver {
 
     /*
         REQUIRES: 1 <= zone <= 5
-        EFFECTS: initialize all the data members,
-                 set this driver to be available all the time at his/her given location,
-                 set the ranking of this driver to be half of 2.5,
-                 give a number to this driver.
+        EFFECTS: initializes all the data members,
+                 sets this driver to be available all the time at his/her given location,
+                 sets the rating of this driver to be half of 2.5,
+                 gives a number to this driver.
      */
     public Driver(String name, int zone) {
         this.name = name;
         this.zone = zone;
         availability = new int[24];
         Arrays.fill(availability, zone);
-        ranking = 2.5;
+        rating = 2.5;
     }
 
     // Getters
-    public double getRanking() {
-        return ranking;
+    public double getRating() {
+        return rating;
     }
 
     public String getName() {
@@ -43,16 +44,16 @@ public class Driver {
     }
 
     /*
-            REQUIRES: 0 <= time <= 23
-            EFFECTS: returns 0 if the driver is not available at the given time.
-                     Else, returns the location (zone) of the driver at the given time.
-         */
+        REQUIRES: 0 <= time <= 23
+        EFFECTS: returns 0 if the driver is not available at the given time.
+                 Else, returns the location (zone) of the driver at the given time.
+     */
     public int getAvailability(int time) {
         return (availability[time]);
     }
 
     /*
-        REQUIRES: 0 <= time <= 23, 1 <= duration <= 4, 1 <= destination <= 5
+        REQUIRES: 0 <= time <= 23, 1 <= destination <= 5
         MODIFIES: this
         EFFECTS: driver becomes unavailable during a ride,
                  and the driver's location is changed to the destination after the ride.
@@ -81,17 +82,17 @@ public class Driver {
     }
 
     /*
-        REQUIRES: 0 <= newRank <= 5
+        REQUIRES: 0 <= newRate <= 5
         MODIFIES: this
-        EFFECTS: update the ranking of this driver.
+        EFFECTS: updates the rating of this driver.
      */
-    public void changeRanking(double newRank) {
-        ranking = (ranking + newRank) / 2;
+    public void changeRating(double newRate) {
+        rating = (rating + newRate) / 2;
     }
 
-    // EFFECTS: returns a string telling the name and ranking of the driver.
+    // EFFECTS: returns a string telling the name and rating of the driver.
     public String getInformation() {
-        return (name + " - " + ranking + "/5");
+        return (name + " - " + rating + "/5");
     }
 
 }

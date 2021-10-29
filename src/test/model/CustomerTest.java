@@ -1,5 +1,10 @@
 package model;
 
+import exceptions.OutOfBoundInput;
+import exceptions.ReviewedRideException;
+import exceptions.RideCannotBeCancelled;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -62,22 +67,29 @@ public class CustomerTest {
     }
 
     @Test
-    public void testReviewWithoutRide() {
-        assertFalse(user.changeReviewStateOfRide(0));
-
-    }
-
-    @Test
     public void testReviewWithRide() {
         user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
-        assertTrue(user.changeReviewStateOfRide(0));
+        try {
+            user.changeReviewStateOfRide(0);
+        } catch (ReviewedRideException e) {
+            fail("There should be no ReviewedRideException");
+        }
     }
 
     @Test
     public void testReviewWithReviewedRide() {
         user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
-        user.changeReviewStateOfRide(0);
-        assertFalse(user.changeReviewStateOfRide(0));
+        try {
+            user.changeReviewStateOfRide(0);
+        } catch (ReviewedRideException e) {
+            fail("There should be no ReviewedRideException");
+        }
+        try {
+            user.changeReviewStateOfRide(0);
+            fail("ReviewedRideException should have occurred");
+        } catch (ReviewedRideException e) {
+            // correct
+        }
     }
 
     @Test
@@ -96,36 +108,63 @@ public class CustomerTest {
     @Test
     public void testRideHistoryWithReviewedRide() {
         user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
-        user.changeReviewStateOfRide(0);
+        try {
+            user.changeReviewStateOfRide(0);
+        } catch (ReviewedRideException e) {
+            fail("There should be no ReviewedRideException");
+        }
         List<String> history = user.getRideHistory();
         assertTrue(history.isEmpty());
     }
 
     @Test
-    public void testCancellableWithoutRide() {
-        assertEquals(-1, user.cancellable(0));
-    }
-
-    @Test
-    public void testCancellableWithCancellableRide() {
+    public void testCancelReviewedRide() {
         user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
-        assertEquals(driver, user.cancellable(0));
-    }
-
-    @Test
-    public void testCancellableWithLongLiveRide() {
-        driver = start + 1;
-        additional = abs(driver - start);
-        user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
-        assertEquals(-1, user.cancellable(0));
+        try {
+            user.changeReviewStateOfRide(0);
+            user.cancel(0);
+            fail("ReviewedRideException should have occurred");
+        } catch (ReviewedRideException e) {
+            // correct
+        } catch (RideCannotBeCancelled e) {
+            fail("There should be no RideCannotBeCancelled");
+        }
     }
 
     @Test
     public void testCancelRide() {
         user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
-//        assertTrue(user.numberOfRides() > 0);
-        assertEquals(1, user.numberOfRides());
-        user.cancel(0);
+        try {
+            user.cancel(0);
+        } catch (RideCannotBeCancelled rideCannotBeCancelled) {
+            fail("There should be no RideCannotBeCancelled");
+        } catch (ReviewedRideException e) {
+            fail("There should be no ReviewedRideException");
+        }
         assertEquals(0, user.numberOfRides());
+    }
+
+    @Test
+    public void testCancelCrossZoneRide() {
+        driver = start + 1;
+        additional = abs(driver - start);
+        user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
+        try {
+            user.cancel(0);
+            fail("RideCannotBeCancelled should have occurred");
+        } catch (RideCannotBeCancelled rideCannotBeCancelled) {
+           // correct
+        } catch (ReviewedRideException e) {
+            fail("There should be no ReviewedRideException");
+        }
+        assertEquals(1, user.numberOfRides());
+    }
+
+    @Test
+    public void testTOJson() {
+        user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
+        JSONObject json = user.toJson();
+        JSONArray rides = json.getJSONArray("rides");
+        assertFalse(rides.isEmpty());
     }
 }

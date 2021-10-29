@@ -1,5 +1,9 @@
 package model;
 
+import exceptions.OutOfBoundInput;
+import exceptions.ReviewedRideException;
+import exceptions.RideCannotBeCancelled;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +21,6 @@ public class CompanyTest {
     private int duration;
     private int driver;
     private int additional;
-    private String name = "Dyson";
     private int withinZoneCost;
     private int multiZonesCost;
 
@@ -28,8 +31,8 @@ public class CompanyTest {
         time = 10;
         start = 2;
         end = 4;
-        duration = abs(end - start);
         driver = 3;
+        duration = abs(end - start);
         additional = abs(ourCompany.getDriverZone(driver) - start);
         withinZoneCost = ourCompany.getOneZoneCost();
         multiZonesCost = ourCompany.getAdditionalFee();
@@ -42,6 +45,7 @@ public class CompanyTest {
             assertTrue(ourCompany.getDriverZone(i) > 0);
             assertTrue(ourCompany.getDriverZone(i) < 6);
         }
+        assertEquals(customer, ourCompany.getUser());
     }
 
     @Test
@@ -53,16 +57,33 @@ public class CompanyTest {
 
     @Test
     public void testWriteReviewWithRide() {
-        ourCompany.addRide(time, start, end, driver, additional);
-        int reference = customer.numberOfRides() - 1;
-        int driver = customer.getDriverOfRide(reference);
         double ranking = 4.25;
-        assertTrue(ourCompany.rateDriver(reference, ranking, driver));
+        ourCompany.addRide(time, start, end, driver, additional);
+        try {
+            ourCompany.rateDriver(0, ranking, driver);
+            customer.getDriverOfRide(0);
+        } catch (ReviewedRideException e) {
+            fail("There should be no ReviewedRideException");
+        }
     }
 
     @Test
-    public void testWriteReviewWithoutRide() {
-        assertFalse(ourCompany.rateDriver(0, 4.5, driver));
+    public void testWriteReviewWithReviewedRide() {
+        double ranking = 4.25;
+        ourCompany.addRide(time, start, end, driver, additional);
+        try {
+            ourCompany.rateDriver(0, ranking, driver);
+            customer.getDriverOfRide(0);
+        } catch (ReviewedRideException e) {
+            fail("There should be no ReviewedRideException");
+        }
+        try {
+            ourCompany.rateDriver(0, ranking, driver);
+            customer.getDriverOfRide(0);
+            fail("ReviewedRideException should have occurred");
+        } catch (ReviewedRideException e) {
+            // correct
+        }
     }
 
     @Test
@@ -79,8 +100,9 @@ public class CompanyTest {
         for (int i = 0 ; i < ourCompany.numberOfDrivers(); i++) {
             ourCompany.addRide(time + 1, start, end, i, additional);
         }
-        List<String> driversAvailable= ourCompany.getDriversWithinZone(time, start, duration);
+        List<String> driversAvailable = ourCompany.getDriversWithinZone(time, start, duration);
         assertEquals(0,driversAvailable.size());
+
     }
 
     @Test
@@ -129,15 +151,66 @@ public class CompanyTest {
         int fee = ourCompany.getAddedFee(driver, startZone);
         int expected = 0;
         assertEquals(expected, fee);
+
     }
 
     @Test
-    public void testCancellation() {
-        ourCompany.addRide(time, start, end, driver, additional);
-        ourCompany.cancellation(driver, time, duration, customer.numberOfRides() - 1);
+    public void testCancellationReviewedRide() {
+        // add a ride
+        ourCompany.addRide(time, start, end, start, additional);
+        // review the ride
+        try {
+            ourCompany.rateDriver(0, 4, driver);
+        } catch (ReviewedRideException e) {
+            fail("There should be no ReviewedRideException");
+        }
+        // try to cancel it
+        try {
+            ourCompany.cancellation(start, time, duration, customer.numberOfRides() - 1);
+            fail("ReviewedRideException should have occurred");
+        } catch (ReviewedRideException e) {
+            // correct
+        } catch (RideCannotBeCancelled e) {
+            fail("There should be no RideCannotBeCancelled");
+        }
+    }
 
-        assertEquals(0, customer.numberOfRides());
-        int bookAgain = ourCompany.addRide(time, start, end, driver, additional);
-        assertTrue(bookAgain > 0);
+    @Test
+    public void testCancellationCrossZoneRide() {
+        // add a ride
+        driver = start + 1;
+        additional = abs(driver - start);
+        ourCompany.addRide(time, start, end, driver, additional);
+
+        // try to cancel it
+        try {
+            ourCompany.cancellation(driver, time, duration, customer.numberOfRides() - 1);
+            fail("RideCannotBeCancelled should have occurred");
+        } catch (ReviewedRideException e) {
+            fail("There should be no ReviewedRideException");
+        } catch (RideCannotBeCancelled e) {
+            // correct
+        }
+    }
+
+    @Test
+    public void testCancellationNormalRide() {
+        // add a ride
+        ourCompany.addRide(time, start, end, start, additional);
+        // review the ride
+        try {
+            ourCompany.cancellation(start, time, duration, customer.numberOfRides() - 1);
+        } catch (ReviewedRideException e) {
+            fail("There should be no ReviewedRideException");
+        } catch (RideCannotBeCancelled e) {
+            fail("There should be no RideCannotBeCancelled");
+        }
+    }
+
+    @Test
+    public void testToJson() {
+        JSONObject json = ourCompany.toJson();
+        JSONObject customerJson = json.getJSONObject("customer");
+        assertTrue(customerJson.getJSONArray("rides").isEmpty());
     }
 }

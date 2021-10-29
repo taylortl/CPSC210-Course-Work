@@ -1,5 +1,6 @@
 package model;
 
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +31,7 @@ public class RideTest {
         assertEquals(start, numberOne.getStart());
         assertEquals((withinZoneCost + (end - start) * multiZonesCost), numberOne.getTotalCost());
         assertFalse(numberOne.isReviewed());
-        assertFalse(numberOne.getOtherZoneDriver());
+        assertEquals(0, numberOne.getOtherZoneDriver());
     }
 
     @Test
@@ -39,7 +40,7 @@ public class RideTest {
         numberOne.addFee(times);
         int cost = (withinZoneCost + (end - start) * multiZonesCost + multiZonesCost * times);
         assertEquals(cost, numberOne.getTotalCost());
-        assertTrue(numberOne.getOtherZoneDriver());
+        assertEquals(times, numberOne.getOtherZoneDriver());
     }
 
     @Test
@@ -52,5 +53,15 @@ public class RideTest {
     public void testReview() {
         numberOne.setReviewed();
         assertTrue(numberOne.isReviewed());
+    }
+
+    @Test
+    public void testToJson() {
+        JSONObject json = numberOne.toJson();
+        assertEquals(driver, json.getInt("driver"));
+        assertEquals(time, json.getInt("startTime"));
+        assertEquals(start, json.getInt("startZone"));
+        assertEquals(end, json.getInt("destination"));
+        assertEquals(0, json.getInt("additionalFee"));
     }
 }

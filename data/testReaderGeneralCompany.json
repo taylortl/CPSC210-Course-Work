@@ -1,0 +1,7 @@
+{"customer": {"rides": [{
+  "additionalFee": 0,
+  "driver": 1,
+  "startZone": 2,
+  "destination": 4,
+  "startTime": 10
+}]}}

@@ -1,0 +1,1506 @@
+Index: src/main/model/Customer.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package model;\r\n\r\nimport java.util.ArrayList;\r\nimport java.util.List;\r\n\r\n// A customer contains a list of booking.\r\npublic class Customer {\r\n    private List<Ride> rides; // list of booking\r\n\r\n    // EFFECTS: initialize the booking list to empty.\r\n    public Customer() {\r\n        rides = new ArrayList<>();\r\n    }\r\n\r\n    // EFFECTS: returns that number of bookings.\r\n    public int numberOfRides() {\r\n        return (rides.size());\r\n    }\r\n\r\n    // REQUIRES: 0 <= reference < number of rides in the list\r\n    // EFFECTS: return the driver of the corresponding ride.\r\n    public int getDriverOfRide(int reference) {\r\n        return rides.get(reference).getDriver();\r\n    }\r\n\r\n    // REQUIRES: 0 <= reference < number of rides in the list\r\n    // EFFECTS: return the starting zone of the corresponding ride.\r\n    public int getStartOfRide(int reference) {\r\n        return rides.get(reference).getStart();\r\n    }\r\n\r\n    // REQUIRES: 0 <= reference < number of rides in the list\r\n    // EFFECTS: return the destination of the corresponding ride.\r\n    public int getEndOfRide(int reference) {\r\n        return rides.get(reference).getDestination();\r\n    }\r\n\r\n    // REQUIRES: 0 <= reference < number of rides in the list\r\n    // EFFECTS: return the time of the corresponding ride.\r\n    public int getTimeOfRide(int reference) {\r\n        return rides.get(reference).getTime();\r\n    }\r\n\r\n    // REQUIRES: 0 <= reference < number of rides in the list\r\n    // MODIFIES: this\r\n    // EFFECTS: return true if successfully review the ride.\r\n    public boolean changeReviewStateOfRide(int reference) {\r\n        if (rides.isEmpty() || rides.get(reference).isReviewed()) {\r\n            return false;\r\n        }\r\n        rides.get(reference).setReviewed();\r\n        return true;\r\n    }\r\n\r\n    // EFFECTS: prints a list of rides the user booked.\r\n    public List<String> getRideHistory() {\r\n        ArrayList<String> outputInformation = new ArrayList<>();\r\n        String information;\r\n        for (int i = 0; i < rides.size(); i++) {\r\n            if (!rides.get(i).isReviewed()) {\r\n                information = i + \": \";\r\n                information += rides.get(i).getDriverName() + \" driving you \";\r\n                information += rides.get(i).getInformation();\r\n                outputInformation.add(information);\r\n            }\r\n        }\r\n        return outputInformation;\r\n    }\r\n\r\n    /*\r\n        REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1 <= destination <= 5,\r\n                  0 <= selected < number of drivers created, 0 <= additional <= 4\r\n        MODIFIES: this\r\n        EFFECTS: add a ride to the list, add the additional fee if driver is not at the starting zone.\r\n     */\r\n    public int addRide(int time, int start, int end, int selected, int additional, String name, int cost, int fee) {\r\n        Ride newRide = new Ride(selected, name, start, end, time, cost, fee);\r\n        if (additional > 0) {\r\n            newRide.addFee(additional);\r\n        }\r\n        int totalCost = newRide.getTotalCost();\r\n        rides.add(newRide);\r\n        return totalCost;\r\n    }\r\n\r\n    // REQUIRES: 0 <= reference < number of rides in the list\r\n    // EFFECTS: returns the driver number of the ride if it can be cancelled.\r\n    public int cancellable(int reference) {\r\n        if (rides.isEmpty() || rides.get(reference).getOtherZoneDriver()) {\r\n            return -1;\r\n        }\r\n        return rides.get(reference).getDriver();\r\n    }\r\n\r\n    // REQUIRES: 0 <= reference < number of rides in the list\r\n    // EFFECTS: remove the given ride from the list.\r\n    public void cancel(int reference) {\r\n        rides.remove(reference);\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/model/Customer.java b/src/main/model/Customer.java
+--- a/src/main/model/Customer.java	(revision 2f3b2230011d326f384079b90e353c3c7c0559b7)
++++ b/src/main/model/Customer.java	(date 1635517539777)
+@@ -1,10 +1,16 @@
+ package model;
+ 
++import exceptions.ReviewedRideException;
++import exceptions.RideCannotBeCancelled;
++import org.json.JSONArray;
++import org.json.JSONObject;
++import persistence.Writable;
++
+ import java.util.ArrayList;
+ import java.util.List;
+ 
+ // A customer contains a list of booking.
+-public class Customer {
++public class Customer implements Writable {
+     private List<Ride> rides; // list of booking
+ 
+     // EFFECTS: initialize the booking list to empty.
+@@ -17,7 +23,7 @@
+         return (rides.size());
+     }
+ 
+-    // REQUIRES: 0 <= reference < number of rides in the list
++    // REQUIRES: 0 <= reference < number of rides booked
+     // EFFECTS: return the driver of the corresponding ride.
+     public int getDriverOfRide(int reference) {
+         return rides.get(reference).getDriver();
+@@ -43,16 +49,16 @@
+ 
+     // REQUIRES: 0 <= reference < number of rides in the list
+     // MODIFIES: this
+-    // EFFECTS: return true if successfully review the ride.
+-    public boolean changeReviewStateOfRide(int reference) {
+-        if (rides.isEmpty() || rides.get(reference).isReviewed()) {
+-            return false;
++    // EFFECTS: rate the driver if the ride is not reviewed
++    //          throw an exception i fthe ride has been reviewed
++    public void changeReviewStateOfRide(int reference) throws ReviewedRideException {
++        if (rides.get(reference).isReviewed()) {
++            throw new ReviewedRideException();
+         }
+         rides.get(reference).setReviewed();
+-        return true;
+     }
+ 
+-    // EFFECTS: prints a list of rides the user booked.
++    // EFFECTS: returns a list of rides the user booked.
+     public List<String> getRideHistory() {
+         ArrayList<String> outputInformation = new ArrayList<>();
+         String information;
+@@ -72,6 +78,7 @@
+                   0 <= selected < number of drivers created, 0 <= additional <= 4
+         MODIFIES: this
+         EFFECTS: add a ride to the list, add the additional fee if driver is not at the starting zone.
++                 return the cost of the ride.
+      */
+     public int addRide(int time, int start, int end, int selected, int additional, String name, int cost, int fee) {
+         Ride newRide = new Ride(selected, name, start, end, time, cost, fee);
+@@ -83,18 +90,32 @@
+         return totalCost;
+     }
+ 
++
+     // REQUIRES: 0 <= reference < number of rides in the list
+-    // EFFECTS: returns the driver number of the ride if it can be cancelled.
+-    public int cancellable(int reference) {
+-        if (rides.isEmpty() || rides.get(reference).getOtherZoneDriver()) {
+-            return -1;
++    // EFFECTS: remove the given ride from the list if it's not reviewed or contains additional cost.
++    //          throw an exception otherwise
++    public void cancel(int reference) throws ReviewedRideException, RideCannotBeCancelled {
++        if (rides.get(reference).isReviewed()) {
++            throw new ReviewedRideException();
++        } else if (rides.get(reference).getDriver() != rides.get(reference).getStart()) {
++            throw new RideCannotBeCancelled();
+         }
+-        return rides.get(reference).getDriver();
+-    }
+-
+-    // REQUIRES: 0 <= reference < number of rides in the list
+-    // EFFECTS: remove the given ride from the list.
+-    public void cancel(int reference) {
+         rides.remove(reference);
+     }
++
++    @Override
++    public JSONObject toJson() {
++        JSONObject json = new JSONObject();
++        json.put("rides", ridesToJson());
++        return json;
++    }
++
++    // EFFECTS: returns rides of this customer as a JSON array
++    private JSONArray ridesToJson() {
++        JSONArray jsonArray = new JSONArray();
++        for (Ride r : rides) {
++            jsonArray.put(r.toJson());
++        }
++        return jsonArray;
++    }
+ }
+Index: src/test/model/CompanyTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package model;\r\n\r\nimport org.junit.jupiter.api.BeforeEach;\r\nimport org.junit.jupiter.api.Test;\r\n\r\nimport java.util.List;\r\n\r\nimport static java.lang.Math.abs;\r\nimport static org.junit.jupiter.api.Assertions.*;\r\n\r\npublic class CompanyTest {\r\n    private Company ourCompany;\r\n    private Customer customer;\r\n    private int time;\r\n    private int start;\r\n    private int end;\r\n    private int duration;\r\n    private int driver;\r\n    private int additional;\r\n    private String name = \"Dyson\";\r\n    private int withinZoneCost;\r\n    private int multiZonesCost;\r\n\r\n    @BeforeEach\r\n    public void setUp() {\r\n        customer = new Customer();\r\n        ourCompany = new Company(customer);\r\n        time = 10;\r\n        start = 2;\r\n        end = 4;\r\n        duration = abs(end - start);\r\n        driver = 3;\r\n        additional = abs(ourCompany.getDriverZone(driver) - start);\r\n        withinZoneCost = ourCompany.getOneZoneCost();\r\n        multiZonesCost = ourCompany.getAdditionalFee();\r\n    }\r\n\r\n    @Test\r\n    public void testConstructor() {\r\n        assertTrue(ourCompany.numberOfDrivers() > 0);\r\n        for (int i = 0 ; i < ourCompany.numberOfDrivers(); i++) {\r\n            assertTrue(ourCompany.getDriverZone(i) > 0);\r\n            assertTrue(ourCompany.getDriverZone(i) < 6);\r\n        }\r\n    }\r\n\r\n    @Test\r\n    public void testAddRide() {\r\n        int cost = ourCompany.addRide(time, start, end, driver, additional);\r\n        int expectedCost = withinZoneCost + (abs(start - end) + additional) * multiZonesCost;\r\n        assertEquals(expectedCost, cost);\r\n    }\r\n\r\n    @Test\r\n    public void testWriteReviewWithRide() {\r\n        ourCompany.addRide(time, start, end, driver, additional);\r\n        int reference = customer.numberOfRides() - 1;\r\n        int driver = customer.getDriverOfRide(reference);\r\n        double ranking = 4.25;\r\n        assertTrue(ourCompany.rateDriver(reference, ranking, driver));\r\n    }\r\n\r\n    @Test\r\n    public void testWriteReviewWithoutRide() {\r\n        assertFalse(ourCompany.rateDriver(0, 4.5, driver));\r\n    }\r\n\r\n    @Test\r\n    public void testGetDriversWithinZonWithoutRides() {\r\n        List<String> driversAvailable;\r\n        for (int i = 1; i < 6; i++) {\r\n            driversAvailable= ourCompany.getDriversWithinZone(time, i, duration);\r\n            assertTrue(driversAvailable.size() > 0);\r\n        }\r\n    }\r\n\r\n    @Test\r\n    public void testGetDriversWithinZoneWithRidesInBetweenDuration() {\r\n        for (int i = 0 ; i < ourCompany.numberOfDrivers(); i++) {\r\n            ourCompany.addRide(time + 1, start, end, i, additional);\r\n        }\r\n        List<String> driversAvailable= ourCompany.getDriversWithinZone(time, start, duration);\r\n        assertEquals(0,driversAvailable.size());\r\n    }\r\n\r\n    @Test\r\n    public void testGetDriversWithinZonWithRides() {\r\n        for (int i = 0 ; i < ourCompany.numberOfDrivers(); i++) {\r\n            ourCompany.addRide(time, start, end, i, additional);\r\n        }\r\n        List<String> driversAvailable= ourCompany.getDriversWithinZone(time, start, duration);\r\n        assertEquals(0,driversAvailable.size());\r\n    }\r\n\r\n    @Test\r\n    public void testGetDriversOutOfZoneWithoutRides() {\r\n        List<String> driversAvailable = ourCompany.getDriversOutOfZone(time, start, duration);\r\n        assertTrue(driversAvailable.size() > 0);\r\n    }\r\n    @Test\r\n    public void testGetDriversOutOfZoneWithRidesInBetweenDuration() {\r\n        for (int i = 0 ; i < ourCompany.numberOfDrivers(); i++) {\r\n            ourCompany.addRide(time + 1, start , end, i, additional);\r\n        }\r\n        List<String> driversAvailable = ourCompany.getDriversOutOfZone(time, start, duration);\r\n        assertEquals(0, driversAvailable.size());\r\n    }\r\n\r\n    @Test\r\n    public void testGetDriversOutOfZoneWithRides() {\r\n        for (int i = 0 ; i < ourCompany.numberOfDrivers(); i++) {\r\n            ourCompany.addRide(time, start , end, i, additional);\r\n        }\r\n        List<String> driversAvailable = ourCompany.getDriversOutOfZone(time, start, duration);\r\n        assertEquals(0, driversAvailable.size());\r\n    }\r\n\r\n    @Test\r\n    public void testGetAddedFeeDifferentZone() {\r\n        int fee = ourCompany.getAddedFee(driver, start);\r\n        int expected = additional * multiZonesCost;\r\n        assertEquals(expected, fee);\r\n    }\r\n\r\n    @Test\r\n    public void testGetAddedFeeSameZone() {\r\n        int driver = 0;\r\n        int startZone = ourCompany.getDriverZone(0);\r\n        int fee = ourCompany.getAddedFee(driver, startZone);\r\n        int expected = 0;\r\n        assertEquals(expected, fee);\r\n    }\r\n\r\n    @Test\r\n    public void testCancellation() {\r\n        ourCompany.addRide(time, start, end, driver, additional);\r\n        ourCompany.cancellation(driver, time, duration, customer.numberOfRides() - 1);\r\n\r\n        assertEquals(0, customer.numberOfRides());\r\n        int bookAgain = ourCompany.addRide(time, start, end, driver, additional);\r\n        assertTrue(bookAgain > 0);\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/model/CompanyTest.java b/src/test/model/CompanyTest.java
+--- a/src/test/model/CompanyTest.java	(revision 2f3b2230011d326f384079b90e353c3c7c0559b7)
++++ b/src/test/model/CompanyTest.java	(date 1635517539799)
+@@ -1,5 +1,9 @@
+ package model;
+ 
++import exceptions.OutOfBoundInput;
++import exceptions.ReviewedRideException;
++import exceptions.RideCannotBeCancelled;
++import org.json.JSONObject;
+ import org.junit.jupiter.api.BeforeEach;
+ import org.junit.jupiter.api.Test;
+ 
+@@ -17,7 +21,6 @@
+     private int duration;
+     private int driver;
+     private int additional;
+-    private String name = "Dyson";
+     private int withinZoneCost;
+     private int multiZonesCost;
+ 
+@@ -42,6 +45,7 @@
+             assertTrue(ourCompany.getDriverZone(i) > 0);
+             assertTrue(ourCompany.getDriverZone(i) < 6);
+         }
++        assertEquals(customer, ourCompany.getUser());
+     }
+ 
+     @Test
+@@ -53,16 +57,33 @@
+ 
+     @Test
+     public void testWriteReviewWithRide() {
+-        ourCompany.addRide(time, start, end, driver, additional);
+-        int reference = customer.numberOfRides() - 1;
+-        int driver = customer.getDriverOfRide(reference);
+         double ranking = 4.25;
+-        assertTrue(ourCompany.rateDriver(reference, ranking, driver));
++        ourCompany.addRide(time, start, end, driver, additional);
++        try {
++            ourCompany.rateDriver(0, ranking, driver);
++            customer.getDriverOfRide(0);
++        } catch (ReviewedRideException e) {
++            fail();
++        }
+     }
+ 
+     @Test
+-    public void testWriteReviewWithoutRide() {
+-        assertFalse(ourCompany.rateDriver(0, 4.5, driver));
++    public void testWriteReviewWithReviewedRide() {
++        double ranking = 4.25;
++        ourCompany.addRide(time, start, end, driver, additional);
++        try {
++            ourCompany.rateDriver(0, ranking, driver);
++            customer.getDriverOfRide(0);
++        } catch (ReviewedRideException e) {
++            fail();
++        }
++        try {
++            ourCompany.rateDriver(0, ranking, driver);
++            customer.getDriverOfRide(0);
++            fail();
++        } catch (ReviewedRideException e) {
++            // correct
++        }
+     }
+ 
+     @Test
+@@ -79,8 +100,9 @@
+         for (int i = 0 ; i < ourCompany.numberOfDrivers(); i++) {
+             ourCompany.addRide(time + 1, start, end, i, additional);
+         }
+-        List<String> driversAvailable= ourCompany.getDriversWithinZone(time, start, duration);
++        List<String> driversAvailable = ourCompany.getDriversWithinZone(time, start, duration);
+         assertEquals(0,driversAvailable.size());
++
+     }
+ 
+     @Test
+@@ -117,7 +139,8 @@
+ 
+     @Test
+     public void testGetAddedFeeDifferentZone() {
+-        int fee = ourCompany.getAddedFee(driver, start);
++        int fee = 0;
++        fee = ourCompany.getAddedFee(driver, start);
+         int expected = additional * multiZonesCost;
+         assertEquals(expected, fee);
+     }
+@@ -125,19 +148,71 @@
+     @Test
+     public void testGetAddedFeeSameZone() {
+         int driver = 0;
+-        int startZone = ourCompany.getDriverZone(0);
++        int startZone = 0;
++        startZone = ourCompany.getDriverZone(0);
+         int fee = ourCompany.getAddedFee(driver, startZone);
+         int expected = 0;
+         assertEquals(expected, fee);
++
+     }
+ 
+     @Test
+-    public void testCancellation() {
++    public void testCancellationReviewedRide() {
++        // add a ride
++        ourCompany.addRide(time, start, end, start, additional);
++        // review the ride
++        try {
++            ourCompany.rateDriver(0, 4, driver);
++        } catch (ReviewedRideException e) {
++            fail();
++        }
++        // try to cancel it
++        try {
++            ourCompany.cancellation(start, time, duration, customer.numberOfRides() - 1);
++            fail();
++        } catch (ReviewedRideException e) {
++            // correct
++        } catch (RideCannotBeCancelled e) {
++            fail();
++        }
++    }
++
++    @Test
++    public void testCancellationCrossZoneRide() {
++        // add a ride
++        driver = start + 1;
++        additional = abs(driver - start);
+         ourCompany.addRide(time, start, end, driver, additional);
+-        ourCompany.cancellation(driver, time, duration, customer.numberOfRides() - 1);
++
++        // try to cancel it
++        try {
++            ourCompany.cancellation(driver, time, duration, customer.numberOfRides() - 1);
++            fail();
++        } catch (ReviewedRideException e) {
++            fail();
++        } catch (RideCannotBeCancelled e) {
++            // correct
++        }
++    }
+ 
+-        assertEquals(0, customer.numberOfRides());
+-        int bookAgain = ourCompany.addRide(time, start, end, driver, additional);
+-        assertTrue(bookAgain > 0);
++    @Test
++    public void testCancellationNormalRide() {
++        // add a ride
++        ourCompany.addRide(time, start, end, start, additional);
++        // review the ride
++        try {
++            ourCompany.cancellation(start, time, duration, customer.numberOfRides() - 1);
++        } catch (ReviewedRideException e) {
++            fail();
++        } catch (RideCannotBeCancelled e) {
++            fail();
++        }
++    }
++
++    @Test
++    public void testToJson() {
++        JSONObject json = ourCompany.toJson();
++        JSONObject customerJson = json.getJSONObject("customer");
++        assertTrue(customerJson.getJSONArray("rides").isEmpty());
+     }
+ }
+Index: src/main/model/Company.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package model;\r\n\r\nimport java.util.ArrayList;\r\nimport java.util.List;\r\n\r\nimport static java.lang.Math.abs;\r\n\r\n/*\r\n    Company of the taxi service system, contains a list of drivers working for the company,\r\n    the customer it is currently serving. Most of the operations are done here.\r\n */\r\npublic class Company {\r\n    private List<Driver> drivers; // list of drivers working in the company\r\n    private Customer user; // customer the company is serving right now\r\n    public static final int ONE_ZONE_COST = 10; // cost of a ride within one zone\r\n    public static final int ADDITIONAL_FEE = 5; // additional cost for cross-border\r\n\r\n    // EFFECTS: set the user as the given user, initial the driver list with a list of drivers\r\n    public Company(Customer user) {\r\n        this.user = user;\r\n        drivers = new ArrayList<>();\r\n        initializeDriverList();\r\n    }\r\n\r\n    //Getters\r\n    public int getOneZoneCost() {\r\n        return  ONE_ZONE_COST;\r\n    }\r\n\r\n    public int getAdditionalFee() {\r\n        return ADDITIONAL_FEE;\r\n    }\r\n\r\n    public int numberOfDrivers() {\r\n        return drivers.size();\r\n    }\r\n\r\n    // REQUIRES: 0 <= driver < number of drivers in the list\r\n    // EFFECTS: return the initial zone of the driver.\r\n    public int getDriverZone(int driver) {\r\n        return drivers.get(driver).getZone();\r\n    }\r\n\r\n    // MODIFIES: this\r\n    // EFFECTS: add drivers to the service\r\n    //          there must be 2 drivers in zone 1, and 1 driver in other zones.\r\n    private void initializeDriverList() {\r\n        drivers.add(new Driver(\"Steve\", 1));\r\n        drivers.add(new Driver(\"Jane\", 2));\r\n        drivers.add(new Driver(\"Jaden\", 3));\r\n        drivers.add(new Driver(\"Samuel\", 4));\r\n        drivers.add(new Driver(\"Martha\", 5));\r\n        drivers.add(new Driver(\"Jeremy\", 1));\r\n    }\r\n\r\n    /*\r\n       REQUIRES: 0 <= reference < number of rides booked, 0<= ranking <=5,\r\n                 0 <= drivers < number of drivers in the list\r\n       MODIFIES: this\r\n       EFFECTS: changes the ranking of the driver according to the given ranking from user.\r\n                Returns true if successfully review the ride.\r\n     */\r\n    public boolean rateDriver(int reference, double ranking, int driver) {\r\n        boolean success = user.changeReviewStateOfRide(reference);\r\n        if (success) {\r\n            drivers.get(driver).changeRanking(ranking);\r\n            return true;\r\n        }\r\n        return false;\r\n    }\r\n\r\n    // REQUIRES: 0 <= time <= 23, 1 <= zone <= 5, 1<= duration <=4\r\n    // EFFECTS: returns  a list of string, each containing information about the drivers.\r\n    //          It only includes drivers who are in the given zone at that time.\r\n    public List<String> getDriversWithinZone(int time, int zone, int duration) {\r\n        ArrayList<String> driversAvailable = new ArrayList<>();\r\n        boolean foundDrivers;\r\n        String driverInfo;\r\n        for (int i = 0; i < drivers.size(); i++) {\r\n            if (drivers.get(i).getAvailability(time) == zone) {\r\n                foundDrivers = true;\r\n                for (int j = time + 1; j < (time + duration + 1); j++) {\r\n                    if (drivers.get(i).getAvailability(j) != zone) {\r\n                        foundDrivers = false;\r\n                    }\r\n                }\r\n                if (foundDrivers) {\r\n                    driverInfo = i + \": \" + drivers.get(i).getInformation();\r\n                    driversAvailable.add(driverInfo);\r\n                }\r\n            }\r\n        }\r\n        return driversAvailable;\r\n    }\r\n\r\n    // REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1<= duration <=4\r\n    // EFFECTS: returns a list of string, each containing information about the drivers.\r\n    //          It includes drivers who are available at that time.\r\n    public List<String> getDriversOutOfZone(int time, int start, int duration) {\r\n        ArrayList<String> driversAvailable = new ArrayList<>();\r\n        boolean foundDrivers;\r\n        String driverInfo;\r\n        for (int i = 0; i < drivers.size(); i++) {\r\n            if (drivers.get(i).getAvailability(time) != 0) {\r\n                foundDrivers = true;\r\n                for (int j = time + 1; j < (time + duration + 1); j++) {\r\n                    if (drivers.get(i).getAvailability(j) == 0) {\r\n                        foundDrivers = false;\r\n                    }\r\n                }\r\n                if (foundDrivers) {\r\n                    driverInfo = i + \": \" + drivers.get(i).getInformation();\r\n                    driverInfo += \" (+$\" + getAddedFee(i, start) + \")\";\r\n                    driversAvailable.add(driverInfo);\r\n                }\r\n            }\r\n        }\r\n        return driversAvailable;\r\n    }\r\n\r\n    // REQUIRES: 0 <= driver < number of drivers created, 1 <= start <= 5\r\n    // EFFECTS: returns the additional fee needed to book this driver.\r\n    public int getAddedFee(int driver, int start) {\r\n        int zone = getDriverZone(driver);\r\n        return (ADDITIONAL_FEE * abs(zone - start));\r\n    }\r\n\r\n    /*\r\n       REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1 <= destination <= 5,\r\n                 0 <= selected < number of drivers created, 0 <= additional <= 4\r\n       MODIFIES: this\r\n       EFFECTS: add a ride to the list and change te availability of the driver,\r\n                additional cost needed if origin and destination are not in the same zone,\r\n                returns the cost of the added ride.\r\n    */\r\n    public int addRide(int time, int start, int destination, int selected, int additional) {\r\n        drivers.get(selected).changeAvailability(time, abs(start - destination) + 1, destination);\r\n        String name = drivers.get(selected).getName();\r\n        return user.addRide(time, start, destination, selected, additional, name, ONE_ZONE_COST, ADDITIONAL_FEE);\r\n    }\r\n\r\n    /*\r\n       REQUIRES: 0 <= drivers < number of drivers in the list, 0 <= time <= 23,\r\n                 1<= duration <=4, 0 <= rideNumber < number of rides booked,\r\n       MODIFIES: this\r\n       EFFECTS: set the driver to be available in its original zone in that period.\r\n                call the cancel function in Customer class to remove the ride.\r\n     */\r\n    public void cancellation(int driver, int time, int duration, int reference) {\r\n        user.cancel(reference);\r\n        drivers.get(driver).availableAgain(time, duration);\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/model/Company.java b/src/main/model/Company.java
+--- a/src/main/model/Company.java	(revision 2f3b2230011d326f384079b90e353c3c7c0559b7)
++++ b/src/main/model/Company.java	(date 1635517539843)
+@@ -1,5 +1,10 @@
+ package model;
+ 
++import exceptions.ReviewedRideException;
++import exceptions.RideCannotBeCancelled;
++import org.json.JSONObject;
++import persistence.Writable;
++
+ import java.util.ArrayList;
+ import java.util.List;
+ 
+@@ -9,7 +14,7 @@
+     Company of the taxi service system, contains a list of drivers working for the company,
+     the customer it is currently serving. Most of the operations are done here.
+  */
+-public class Company {
++public class Company implements Writable {
+     private List<Driver> drivers; // list of drivers working in the company
+     private Customer user; // customer the company is serving right now
+     public static final int ONE_ZONE_COST = 10; // cost of a ride within one zone
+@@ -35,6 +40,10 @@
+         return drivers.size();
+     }
+ 
++    public Customer getUser() {
++        return user;
++    }
++
+     // REQUIRES: 0 <= driver < number of drivers in the list
+     // EFFECTS: return the initial zone of the driver.
+     public int getDriverZone(int driver) {
+@@ -60,16 +69,12 @@
+        EFFECTS: changes the ranking of the driver according to the given ranking from user.
+                 Returns true if successfully review the ride.
+      */
+-    public boolean rateDriver(int reference, double ranking, int driver) {
+-        boolean success = user.changeReviewStateOfRide(reference);
+-        if (success) {
+-            drivers.get(driver).changeRanking(ranking);
+-            return true;
+-        }
+-        return false;
++    public void rateDriver(int reference, double ranking, int driver) throws ReviewedRideException {
++       user.changeReviewStateOfRide(reference);
++        drivers.get(driver).changeRanking(ranking);
+     }
+ 
+-    // REQUIRES: 0 <= time <= 23, 1 <= zone <= 5, 1<= duration <=4
++    // REQUIRES: 0 <= time <= 23, 1 <= zone <= 5
+     // EFFECTS: returns  a list of string, each containing information about the drivers.
+     //          It only includes drivers who are in the given zone at that time.
+     public List<String> getDriversWithinZone(int time, int zone, int duration) {
+@@ -93,7 +98,7 @@
+         return driversAvailable;
+     }
+ 
+-    // REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1<= duration <=4
++    // REQUIRES: 0 <= time <= 23, 1 <= zone <= 5
+     // EFFECTS: returns a list of string, each containing information about the drivers.
+     //          It includes drivers who are available at that time.
+     public List<String> getDriversOutOfZone(int time, int start, int duration) {
+@@ -141,13 +146,20 @@
+ 
+     /*
+        REQUIRES: 0 <= drivers < number of drivers in the list, 0 <= time <= 23,
+-                 1<= duration <=4, 0 <= rideNumber < number of rides booked,
++                 0 <= rideNumber < number of rides booked,
+        MODIFIES: this
+        EFFECTS: set the driver to be available in its original zone in that period.
+                 call the cancel function in Customer class to remove the ride.
+      */
+-    public void cancellation(int driver, int time, int duration, int reference) {
++    public void cancellation(int driver, int time, int duration, int reference) throws ReviewedRideException, RideCannotBeCancelled {
+         user.cancel(reference);
+         drivers.get(driver).availableAgain(time, duration);
+     }
++
++    @Override
++    public JSONObject toJson() {
++        JSONObject json = new JSONObject();
++        json.put("customer", user.toJson());
++        return json;
++    }
+ }
+Index: src/test/model/CustomerTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package model;\r\n\r\nimport org.junit.jupiter.api.BeforeEach;\r\nimport org.junit.jupiter.api.Test;\r\n\r\nimport java.util.List;\r\n\r\nimport static java.lang.Math.abs;\r\nimport static org.junit.jupiter.api.Assertions.*;\r\n\r\npublic class CustomerTest {\r\n    private Customer user;\r\n    private String name = \"Tyson\";\r\n    private int driver;\r\n    private int start;\r\n    private int end;\r\n    private int time;\r\n    int additional;\r\n    private int withinZoneCost = 10;\r\n    private int multiZonesCost = 5;\r\n\r\n    @BeforeEach\r\n    public void setUp() {\r\n        user = new Customer();\r\n        driver = 2;\r\n        start = 2;\r\n        end = 5;\r\n        time = 14;\r\n        additional = 0;\r\n    }\r\n\r\n    @Test\r\n    public void testConstructor() {\r\n        assertEquals(0,user.numberOfRides());\r\n    }\r\n\r\n    @Test\r\n    public void testAddRideWithoutAdditionalFee() {\r\n        int cost = user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);\r\n        int expectedCost = withinZoneCost + (abs(start - end) + additional) * multiZonesCost;\r\n        assertEquals(expectedCost, cost);\r\n        assertTrue(user.numberOfRides() > 0);\r\n        assertEquals(time, user.getTimeOfRide(0));\r\n        assertEquals(driver, user.getDriverOfRide(0));\r\n        assertEquals(start, user.getStartOfRide(0));\r\n        assertEquals(end, user.getEndOfRide(0));\r\n    }\r\n\r\n    @Test\r\n    public void testAddRideWithAdditionalFee() {\r\n        driver = 4;\r\n        additional = abs(driver - start);\r\n        int cost = user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);\r\n        int expectedCost = withinZoneCost + (abs(start - end) + additional) * multiZonesCost;\r\n        assertEquals(expectedCost, cost);\r\n        assertTrue(user.numberOfRides() > 0);\r\n        assertEquals(time, user.getTimeOfRide(0));\r\n        assertEquals(driver, user.getDriverOfRide(0));\r\n        assertEquals(start, user.getStartOfRide(0));\r\n        assertEquals(end, user.getEndOfRide(0));\r\n\r\n    }\r\n\r\n    @Test\r\n    public void testReviewWithoutRide() {\r\n        assertFalse(user.changeReviewStateOfRide(0));\r\n\r\n    }\r\n\r\n    @Test\r\n    public void testReviewWithRide() {\r\n        user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);\r\n        assertTrue(user.changeReviewStateOfRide(0));\r\n    }\r\n\r\n    @Test\r\n    public void testReviewWithReviewedRide() {\r\n        user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);\r\n        user.changeReviewStateOfRide(0);\r\n        assertFalse(user.changeReviewStateOfRide(0));\r\n    }\r\n\r\n    @Test\r\n    public void testRideHistoryWithoutRide() {\r\n        List<String> history = user.getRideHistory();\r\n        assertTrue(history.isEmpty());\r\n    }\r\n\r\n    @Test\r\n    public void testRideHistoryWithRide() {\r\n        user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);\r\n        List<String> history = user.getRideHistory();\r\n        assertTrue(history.size() > 0);\r\n    }\r\n\r\n    @Test\r\n    public void testRideHistoryWithReviewedRide() {\r\n        user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);\r\n        user.changeReviewStateOfRide(0);\r\n        List<String> history = user.getRideHistory();\r\n        assertTrue(history.isEmpty());\r\n    }\r\n\r\n    @Test\r\n    public void testCancellableWithoutRide() {\r\n        assertEquals(-1, user.cancellable(0));\r\n    }\r\n\r\n    @Test\r\n    public void testCancellableWithCancellableRide() {\r\n        user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);\r\n        assertEquals(driver, user.cancellable(0));\r\n    }\r\n\r\n    @Test\r\n    public void testCancellableWithLongLiveRide() {\r\n        driver = start + 1;\r\n        additional = abs(driver - start);\r\n        user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);\r\n        assertEquals(-1, user.cancellable(0));\r\n    }\r\n\r\n    @Test\r\n    public void testCancelRide() {\r\n        user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);\r\n//        assertTrue(user.numberOfRides() > 0);\r\n        assertEquals(1, user.numberOfRides());\r\n        user.cancel(0);\r\n        assertEquals(0, user.numberOfRides());\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/model/CustomerTest.java b/src/test/model/CustomerTest.java
+--- a/src/test/model/CustomerTest.java	(revision 2f3b2230011d326f384079b90e353c3c7c0559b7)
++++ b/src/test/model/CustomerTest.java	(date 1635499793162)
+@@ -1,5 +1,10 @@
+ package model;
+ 
++import exceptions.OutOfBoundInput;
++import exceptions.ReviewedRideException;
++import exceptions.RideCannotBeCancelled;
++import org.json.JSONArray;
++import org.json.JSONObject;
+ import org.junit.jupiter.api.BeforeEach;
+ import org.junit.jupiter.api.Test;
+ 
+@@ -61,23 +66,29 @@
+ 
+     }
+ 
+-    @Test
+-    public void testReviewWithoutRide() {
+-        assertFalse(user.changeReviewStateOfRide(0));
+-
+-    }
+-
+     @Test
+     public void testReviewWithRide() {
+         user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
+-        assertTrue(user.changeReviewStateOfRide(0));
++        try {
++            user.changeReviewStateOfRide(0);
++        } catch (ReviewedRideException e) {
++            fail();
++        }
+     }
+ 
+     @Test
+     public void testReviewWithReviewedRide() {
+         user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
+-        user.changeReviewStateOfRide(0);
+-        assertFalse(user.changeReviewStateOfRide(0));
++        try {
++            user.changeReviewStateOfRide(0);
++        } catch (ReviewedRideException e) {
++            fail();
++        }
++        try {
++            user.changeReviewStateOfRide(0);
++            fail();
++        } catch (ReviewedRideException e) {
++        }
+     }
+ 
+     @Test
+@@ -96,36 +107,63 @@
+     @Test
+     public void testRideHistoryWithReviewedRide() {
+         user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
+-        user.changeReviewStateOfRide(0);
++        try {
++            user.changeReviewStateOfRide(0);
++        } catch (ReviewedRideException e) {
++            fail();
++        }
+         List<String> history = user.getRideHistory();
+         assertTrue(history.isEmpty());
+     }
+ 
+     @Test
+-    public void testCancellableWithoutRide() {
+-        assertEquals(-1, user.cancellable(0));
++    public void testCancelReviewedRide() {
++        user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
++        try {
++            user.changeReviewStateOfRide(0);
++            user.cancel(0);
++            fail();
++        } catch (ReviewedRideException e) {
++            // correct
++        } catch (RideCannotBeCancelled e) {
++            fail();
++        }
+     }
+ 
+     @Test
+-    public void testCancellableWithCancellableRide() {
++    public void testCancelRide() {
+         user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
+-        assertEquals(driver, user.cancellable(0));
++        try {
++            user.cancel(0);
++        } catch (RideCannotBeCancelled rideCannotBeCancelled) {
++           fail();
++        } catch (ReviewedRideException e) {
++            fail();
++        }
++        assertEquals(0, user.numberOfRides());
+     }
+ 
+     @Test
+-    public void testCancellableWithLongLiveRide() {
++    public void testCancelCrossZoneRide() {
+         driver = start + 1;
+         additional = abs(driver - start);
+         user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
+-        assertEquals(-1, user.cancellable(0));
++        try {
++            user.cancel(0);
++            fail();
++        } catch (RideCannotBeCancelled rideCannotBeCancelled) {
++           // correct
++        } catch (ReviewedRideException e) {
++            fail();
++        }
++        assertEquals(1, user.numberOfRides());
+     }
+ 
+     @Test
+-    public void testCancelRide() {
++    public void testTOJson() {
+         user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
+-//        assertTrue(user.numberOfRides() > 0);
+-        assertEquals(1, user.numberOfRides());
+-        user.cancel(0);
+-        assertEquals(0, user.numberOfRides());
++        JSONObject json = user.toJson();
++        JSONArray rides = json.getJSONArray("rides");
++        assertFalse(rides.isEmpty());
+     }
+ }
+Index: src/test/model/RideTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package model;\r\n\r\nimport org.junit.jupiter.api.BeforeEach;\r\nimport org.junit.jupiter.api.Test;\r\n\r\nimport static org.junit.jupiter.api.Assertions.*;\r\n\r\npublic class RideTest {\r\n    private Ride numberOne;\r\n    private int driver = 5;\r\n    private String name = \"Tyson\";\r\n    private int start = 2;\r\n    private int end = 5;\r\n    private int time = 14;\r\n    private int withinZoneCost = 10;\r\n    private int multiZonesCost = 5;\r\n\r\n    @BeforeEach\r\n    public void setUp() {\r\n        numberOne = new Ride(driver, name, start, end, time, withinZoneCost, multiZonesCost);\r\n    }\r\n\r\n    @Test\r\n    public void testConstructor() {\r\n        assertEquals(driver, numberOne.getDriver());\r\n        assertEquals(name, numberOne.getDriverName());\r\n        assertEquals(start, numberOne.getStart());\r\n        assertEquals(end, numberOne.getDestination());\r\n        assertEquals(time, numberOne.getTime());\r\n        assertEquals(start, numberOne.getStart());\r\n        assertEquals((withinZoneCost + (end - start) * multiZonesCost), numberOne.getTotalCost());\r\n        assertFalse(numberOne.isReviewed());\r\n        assertFalse(numberOne.getOtherZoneDriver());\r\n    }\r\n\r\n    @Test\r\n    public void testAddFee() {\r\n        int times = 3;\r\n        numberOne.addFee(times);\r\n        int cost = (withinZoneCost + (end - start) * multiZonesCost + multiZonesCost * times);\r\n        assertEquals(cost, numberOne.getTotalCost());\r\n        assertTrue(numberOne.getOtherZoneDriver());\r\n    }\r\n\r\n    @Test\r\n    public void testGetInformation() {\r\n        String expected = \"from zone \" + start + \" to zone \" + end;\r\n        assertEquals(expected, numberOne.getInformation());\r\n    }\r\n\r\n    @Test\r\n    public void testReview() {\r\n        numberOne.setReviewed();\r\n        assertTrue(numberOne.isReviewed());\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/model/RideTest.java b/src/test/model/RideTest.java
+--- a/src/test/model/RideTest.java	(revision 2f3b2230011d326f384079b90e353c3c7c0559b7)
++++ b/src/test/model/RideTest.java	(date 1635500031615)
+@@ -1,5 +1,6 @@
+ package model;
+ 
++import org.json.JSONObject;
+ import org.junit.jupiter.api.BeforeEach;
+ import org.junit.jupiter.api.Test;
+ 
+@@ -30,7 +31,7 @@
+         assertEquals(start, numberOne.getStart());
+         assertEquals((withinZoneCost + (end - start) * multiZonesCost), numberOne.getTotalCost());
+         assertFalse(numberOne.isReviewed());
+-        assertFalse(numberOne.getOtherZoneDriver());
++        assertEquals(0, numberOne.getOtherZoneDriver());
+     }
+ 
+     @Test
+@@ -39,7 +40,7 @@
+         numberOne.addFee(times);
+         int cost = (withinZoneCost + (end - start) * multiZonesCost + multiZonesCost * times);
+         assertEquals(cost, numberOne.getTotalCost());
+-        assertTrue(numberOne.getOtherZoneDriver());
++        assertEquals(times, numberOne.getOtherZoneDriver());
+     }
+ 
+     @Test
+@@ -53,4 +54,14 @@
+         numberOne.setReviewed();
+         assertTrue(numberOne.isReviewed());
+     }
++
++    @Test
++    public void testToJson() {
++        JSONObject json = numberOne.toJson();
++        assertEquals(driver, json.getInt("driver"));
++        assertEquals(time, json.getInt("startTime"));
++        assertEquals(start, json.getInt("startZone"));
++        assertEquals(end, json.getInt("destination"));
++        assertEquals(0, json.getInt("additionalFee"));
++    }
+ }
+Index: src/main/ui/TaxiService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package ui;\r\n\r\nimport model.Company;\r\nimport model.Customer;\r\n\r\nimport java.util.List;\r\nimport java.util.Scanner;\r\n\r\nimport static java.lang.Math.abs;\r\n\r\n// A user interface class that prompt for values for the ride booking system.\r\npublic class TaxiService {\r\n    private Customer user;\r\n    private Company kingdom;\r\n    private Scanner input; // takes the input of the user\r\n\r\n    // EFFECTS: initialize an empty ride list, a list of 6 drivers and run the service.\r\n    public TaxiService() {\r\n        input = new Scanner(System.in);\r\n        user = new Customer();\r\n        kingdom = new Company(user);\r\n        runService();\r\n        input.close();\r\n    }\r\n\r\n    // EFFECTS: prints a menu of the application.\r\n    private void printMenu() {\r\n        System.out.println(\"---------------------------------------\");\r\n        System.out.println(\"1. Rate the drivers.\");\r\n        System.out.println(\"2. Book a ride.\");\r\n        System.out.println(\"3. Cancel a ride.\");\r\n        System.out.println(\"4. View price\");\r\n        System.out.println(\"5. Exit\");\r\n        System.out.println(\"---------------------------------------\");\r\n    }\r\n\r\n    // EFFECTS: run the application.\r\n    private void runService() {\r\n        boolean exit = false;\r\n        int option;\r\n        while (!exit) {\r\n            printMenu();\r\n            System.out.print(\"Please enter the number from the menu: \");\r\n            option = input.nextInt();\r\n            if (option == 5) {\r\n                exit = true;\r\n                System.out.println(\"Thank you for choosing us, we hope to see you soon!\");\r\n            } else if (option > 5 || option < 1) {\r\n                System.out.println(\"Wrong option, please choose from 1 to 4.\");\r\n            } else {\r\n                doJobs(option);\r\n            }\r\n        }\r\n    }\r\n\r\n    // EFFECTS: process the option of the user.\r\n    private void doJobs(int option) {\r\n        System.out.println(\"---------------------------------------\");\r\n        switch (option) {\r\n            case 1:\r\n                option1();\r\n                break;\r\n            case 2:\r\n                option2();\r\n                break;\r\n            case 3:\r\n                option3();\r\n                break;\r\n            case 4:\r\n                printPrice();\r\n                break;\r\n        }\r\n    }\r\n\r\n    // EFFECTS: print the price table.\r\n    private void printPrice() {\r\n        System.out.println(\"NOTE: RIDES SERVED BY DRIVERS OUTSIDE THE STARTING ZONE CANNOT BE CANCELLED.\");\r\n        System.out.println();\r\n        System.out.println(\"Ride within 1 zone   - $\" + kingdom.getOneZoneCost());\r\n        System.out.println(\"Additional cost for ride between zones   - +$\" + kingdom.getAdditionalFee() + \" /zone\");\r\n        System.out.println(\"Additional cost for booking driver outside the starting zone   - +$\"\r\n                + kingdom.getAdditionalFee() + \" /zone\");\r\n\r\n\r\n    }\r\n\r\n    // EFFECTS: prints a list of rides the user booked, rides that are cancelled or reviewed will not be shown.\r\n    private boolean printRides() {\r\n        List<String> rides = user.getRideHistory();\r\n        System.out.println(\"NOTE: RIDES THAT WERE RATED OR CANCELLED WILL NOT BE SHOWN.\");\r\n        System.out.println();\r\n        if (rides.isEmpty()) {\r\n            return false;\r\n        }\r\n        for (String r : rides) {\r\n            System.out.println(r);\r\n        }\r\n        System.out.println(\"---------------------------------------\");\r\n        return true;\r\n    }\r\n\r\n    // EFFECTS: show a message when the user gives a wrong input.\r\n    private void incorrectInput() {\r\n        System.out.println(\"Sorry, you have typed an invalid input or wrong number. Please start again.\");\r\n    }\r\n\r\n    // EFFECTS: prompt the user for the reference number of the ride to rank the driver of that ride.\r\n    private void option1() {\r\n        if (user.numberOfRides() == 0) {\r\n            System.out.println(\"Sorry, you did not make any booking.\");\r\n        } else {\r\n            boolean rides = printRides();\r\n            if (rides) {\r\n                System.out.print(\"Please enter the reference number of the ride: \");\r\n                int reference = input.nextInt();\r\n                if (reference >= 0 && reference < user.numberOfRides()) {\r\n                    doRating(reference);\r\n                } else {\r\n                    incorrectInput();\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    // REQUIRES: 0 <= reference < number of rides booked\r\n    // EFFECTS: prompt the user for the rank of the driver and do the rating.\r\n    private void doRating(int reference) {\r\n        int driverOfRide = user.getDriverOfRide(reference);\r\n        System.out.print(\"Rank from 0 - 5: \");\r\n        double rating = input.nextDouble();\r\n        boolean success = kingdom.rateDriver(reference, rating, driverOfRide);\r\n        if (success) {\r\n            System.out.println(\"Thank you for your advice.\");\r\n        } else {\r\n            incorrectInput();\r\n        }\r\n    }\r\n\r\n    // EFFECTS: prompt the user for time, origin, destination of the ride for booking.\r\n    private void option2() {\r\n        boolean correctInput = true;\r\n        System.out.print(\"Please enter the time of your appointment(0-23): \");\r\n        int time = input.nextInt();\r\n        if (time > 23 || time < 0) {\r\n            correctInput = false;\r\n        }\r\n        System.out.print(\"Please enter the zone of your starting point(1 - 5): \");\r\n        int start = input.nextInt();\r\n        if (start > 5 || start < 1) {\r\n            correctInput = false;\r\n        }\r\n        System.out.print(\"Please enter the zone of your destination(1 - 5): \");\r\n        int destination = input.nextInt();\r\n        if (destination > 5 || destination < 1) {\r\n            correctInput = false;\r\n        }\r\n        if (correctInput) {\r\n            int duration = abs(start - destination) + 1;\r\n            booking(time, start, destination, duration);\r\n        } else {\r\n            incorrectInput();\r\n        }\r\n    }\r\n\r\n    // REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1 <= destination <= 5, 1<= duration <=4\r\n    // EFFECTS: add a booking.\r\n    private void booking(int time, int start, int destination, int duration) {\r\n        System.out.println(\"---------------------------------------\");\r\n        List<String> driversAvailable = kingdom.getDriversWithinZone(time, start, duration);\r\n        if (driversAvailable.isEmpty()) {\r\n            addFeeBooking(time, start, destination, duration);\r\n        } else {\r\n            int chosenDriver = choosingDriver(driversAvailable);\r\n            if (chosenDriver >= 0) {\r\n                receipt(time, start, destination, chosenDriver, 0);\r\n            }\r\n        }\r\n    }\r\n\r\n    // EFFECTS: print the given list of drivers and prompt the user to choose a driver.\r\n    private int choosingDriver(List<String> driversAvailable) {\r\n        for (String d : driversAvailable) {\r\n            System.out.println(d);\r\n        }\r\n        System.out.println(\"---------------------------------------\");\r\n        System.out.print(\"Please choose the drivers from above, enter the number of the driver: \");\r\n        int chosenDriver = input.nextInt();\r\n        if (chosenDriver >= kingdom.numberOfDrivers() || chosenDriver < 0) {\r\n            incorrectInput();\r\n            chosenDriver = -1;\r\n        }\r\n        return chosenDriver;\r\n    }\r\n\r\n    // REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1 <= destination <= 5,\r\n    //           0 <= drivers < number of drivers in the list, 1 <= additional <= 4\r\n    // MODIFIES: make the Company to book a ride and print the receipt.\r\n    private void receipt(int time,int start,int destination,int chosenDriver,int additional) {\r\n        int cost = kingdom.addRide(time, start, destination, chosenDriver, additional);\r\n        System.out.println(\"---------------------------------------\");\r\n        System.out.println(\"The cost of the ride is $ \" + cost\r\n                + \", our driver will contact you soon.\");\r\n    }\r\n\r\n    //REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1 <= destination <= 5, 1 <= duration <= 4\r\n    // EFFECTS: booking if there's no drivers in the starting zone.\r\n    private void addFeeBooking(int time, int start, int destination, int duration) {\r\n        System.out.println(\"There's no driver available in the zone at that time. \");\r\n        System.out.print(\"Would you like to choose drivers from other zones? (y/n)? \");\r\n        input.nextLine();\r\n        char answer = input.nextLine().charAt(0);\r\n        if (answer == 'y') {\r\n            List<String> driversAvailable = kingdom.getDriversOutOfZone(time, start, duration);\r\n            if (driversAvailable.isEmpty()) {\r\n                System.out.print(\"Sorry, there's no other drivers available at that time. We hope to see you again.\");\r\n            } else {\r\n                int chosenOne = choosingDriver(driversAvailable);\r\n                if (chosenOne >= 0 && chosenOne < kingdom.numberOfDrivers()) {\r\n                    int driverZone = kingdom.getDriverZone(chosenOne);\r\n                    receipt(time, start, destination, chosenOne, abs(driverZone - start));\r\n                }\r\n            }\r\n        } else if (answer == 'n') {\r\n            System.out.println(\"We apologize for the inconvenience.\");\r\n        }\r\n    }\r\n\r\n    // EFFECTS: prompt the user for the reference number of the ride for cancellation.\r\n    private void option3() {\r\n        if (user.numberOfRides() == 0) {\r\n            System.out.println(\"Sorry, you did not make any booking.\");\r\n        } else {\r\n            boolean rides = printRides();\r\n            if (rides) {\r\n                System.out.print(\"Please enter the reference number of the ride: \");\r\n                int reference = input.nextInt();\r\n                if (reference < user.numberOfRides() && reference >= 0) {\r\n                    cancellation(reference);\r\n                } else {\r\n                    incorrectInput();\r\n                }\r\n            } else {\r\n                System.out.println(\"Reviewed rides cannot be cancelled.\");\r\n            }\r\n        }\r\n    }\r\n\r\n    // REQUIRES: 0 <= rideNumber < number of rides booked\r\n    // EFFECTS: cancel the chosen ride of the user\r\n    private void cancellation(int reference) {\r\n        int cancelDriver = user.cancellable(reference);\r\n        if (cancelDriver < 0) {\r\n            System.out.println(\"Sorry, this booking cannot be cancelled.\");\r\n        } else {\r\n            int start = user.getStartOfRide(reference);\r\n            int end = user.getEndOfRide(reference);\r\n            int time = user.getTimeOfRide(reference);\r\n            int duration = abs(start - end) + 1;\r\n            kingdom.cancellation(cancelDriver, time, duration, reference);\r\n            System.out.println(\"Booking is cancelled, we hope to see you again.\");\r\n        }\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/ui/TaxiService.java b/src/main/ui/TaxiService.java
+--- a/src/main/ui/TaxiService.java	(revision 2f3b2230011d326f384079b90e353c3c7c0559b7)
++++ b/src/main/ui/TaxiService.java	(date 1635498918796)
+@@ -1,8 +1,16 @@
+ package ui;
+ 
++import exceptions.OutOfBoundInput;
++import exceptions.ReviewedRideException;
++import exceptions.RideCannotBeCancelled;
++import exceptions.WrongRideInput;
+ import model.Company;
+ import model.Customer;
++import persistence.JsonReader;
++import persistence.JsonWriter;
+ 
++import java.io.FileNotFoundException;
++import java.io.IOException;
+ import java.util.List;
+ import java.util.Scanner;
+ 
+@@ -10,15 +18,21 @@
+ 
+ // A user interface class that prompt for values for the ride booking system.
+ public class TaxiService {
++    private static final String JSON_FILE = "./data/kingdom.json";
++    private JsonWriter jsonWriter;
++    private JsonReader jsonReader;
+     private Customer user;
+     private Company kingdom;
+     private Scanner input; // takes the input of the user
+ 
+     // EFFECTS: initialize an empty ride list, a list of 6 drivers and run the service.
+-    public TaxiService() {
++    public TaxiService() throws FileNotFoundException {
++        // scanner for user input
+         input = new Scanner(System.in);
+         user = new Customer();
+         kingdom = new Company(user);
++        jsonWriter = new JsonWriter(JSON_FILE);
++        jsonReader = new JsonReader(JSON_FILE);
+         runService();
+         input.close();
+     }
+@@ -29,8 +43,10 @@
+         System.out.println("1. Rate the drivers.");
+         System.out.println("2. Book a ride.");
+         System.out.println("3. Cancel a ride.");
+-        System.out.println("4. View price");
+-        System.out.println("5. Exit");
++        System.out.println("4. Save my ride history");
++        System.out.println("5. Load my rides");
++        System.out.println("6. View price");
++        System.out.println("7. Exit");
+         System.out.println("---------------------------------------");
+     }
+ 
+@@ -42,19 +58,23 @@
+             printMenu();
+             System.out.print("Please enter the number from the menu: ");
+             option = input.nextInt();
+-            if (option == 5) {
++            if (option == 7) {
+                 exit = true;
+                 System.out.println("Thank you for choosing us, we hope to see you soon!");
+-            } else if (option > 5 || option < 1) {
+-                System.out.println("Wrong option, please choose from 1 to 4.");
++            } else if (option > 7 || option < 1) {
++                System.out.println("Wrong option, please choose from 1 to 7.");
+             } else {
+-                doJobs(option);
++                try {
++                    doJobs(option);
++                } catch (OutOfBoundInput e) {
++                    incorrectInput();
++                }
+             }
+         }
+     }
+ 
+     // EFFECTS: process the option of the user.
+-    private void doJobs(int option) {
++    private void doJobs(int option) throws OutOfBoundInput {
+         System.out.println("---------------------------------------");
+         switch (option) {
+             case 1:
+@@ -67,6 +87,12 @@
+                 option3();
+                 break;
+             case 4:
++                saveHistory();
++                break;
++            case 5:
++                loadHistory();
++                break;
++            case 6:
+                 printPrice();
+                 break;
+         }
+@@ -80,23 +106,23 @@
+         System.out.println("Additional cost for ride between zones   - +$" + kingdom.getAdditionalFee() + " /zone");
+         System.out.println("Additional cost for booking driver outside the starting zone   - +$"
+                 + kingdom.getAdditionalFee() + " /zone");
+-
+-
+     }
+ 
+     // EFFECTS: prints a list of rides the user booked, rides that are cancelled or reviewed will not be shown.
+     private boolean printRides() {
+         List<String> rides = user.getRideHistory();
++
+         System.out.println("NOTE: RIDES THAT WERE RATED OR CANCELLED WILL NOT BE SHOWN.");
+         System.out.println();
+-        if (rides.isEmpty()) {
+-            return false;
+-        }
+-        for (String r : rides) {
+-            System.out.println(r);
++        if (!rides.isEmpty()) {
++            for (String r : rides) {
++                System.out.println(r);
++            }
++            return true;
+         }
++
+         System.out.println("---------------------------------------");
+-        return true;
++        return false;
+     }
+ 
+     // EFFECTS: show a message when the user gives a wrong input.
+@@ -105,64 +131,53 @@
+     }
+ 
+     // EFFECTS: prompt the user for the reference number of the ride to rank the driver of that ride.
+-    private void option1() {
+-        if (user.numberOfRides() == 0) {
+-            System.out.println("Sorry, you did not make any booking.");
++    private void option1() throws OutOfBoundInput {
++        boolean rides = printRides();
++        if (!rides) {
++            System.out.println("(You either did not make any booking or you have reviewed your rides)");
+         } else {
+-            boolean rides = printRides();
+-            if (rides) {
+-                System.out.print("Please enter the reference number of the ride: ");
+-                int reference = input.nextInt();
+-                if (reference >= 0 && reference < user.numberOfRides()) {
+-                    doRating(reference);
+-                } else {
+-                    incorrectInput();
+-                }
++            System.out.print("Please enter the reference number of the ride: ");
++            int reference = input.nextInt();
++            if (reference < 0 || reference >= user.numberOfRides()) {
++                throw new OutOfBoundInput();
++            }
++            try {
++                doRating(reference);
++            } catch (ReviewedRideException e) {
++                System.out.println("Please make sure you entered the reference number provided in the list.");
+             }
+         }
++
+     }
+ 
+-    // REQUIRES: 0 <= reference < number of rides booked
+     // EFFECTS: prompt the user for the rank of the driver and do the rating.
+-    private void doRating(int reference) {
++    private void doRating(int reference) throws OutOfBoundInput, ReviewedRideException {
+         int driverOfRide = user.getDriverOfRide(reference);
+         System.out.print("Rank from 0 - 5: ");
+         double rating = input.nextDouble();
+-        boolean success = kingdom.rateDriver(reference, rating, driverOfRide);
+-        if (success) {
+-            System.out.println("Thank you for your advice.");
+-        } else {
+-            incorrectInput();
++        if (rating < 0 || rating > 5) {
++            throw new OutOfBoundInput();
+         }
++        kingdom.rateDriver(reference, rating, driverOfRide);
+     }
+ 
+     // EFFECTS: prompt the user for time, origin, destination of the ride for booking.
+-    private void option2() {
++    private void option2() throws OutOfBoundInput {
+         boolean correctInput = true;
+         System.out.print("Please enter the time of your appointment(0-23): ");
+         int time = input.nextInt();
+-        if (time > 23 || time < 0) {
+-            correctInput = false;
+-        }
+         System.out.print("Please enter the zone of your starting point(1 - 5): ");
+         int start = input.nextInt();
+-        if (start > 5 || start < 1) {
+-            correctInput = false;
+-        }
+         System.out.print("Please enter the zone of your destination(1 - 5): ");
+         int destination = input.nextInt();
+-        if (destination > 5 || destination < 1) {
+-            correctInput = false;
+-        }
+-        if (correctInput) {
+-            int duration = abs(start - destination) + 1;
+-            booking(time, start, destination, duration);
+-        } else {
+-            incorrectInput();
+-        }
++        int duration = abs(start - destination) + 1;
++        if (time > 23 || time < 0 || start > 5 || start < 1
++                || destination > 5 || destination < 1) {
++            throw new OutOfBoundInput();
++        }
++        booking(time, start, destination, duration);
+     }
+ 
+-    // REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1 <= destination <= 5, 1<= duration <=4
+     // EFFECTS: add a booking.
+     private void booking(int time, int start, int destination, int duration) {
+         System.out.println("---------------------------------------");
+@@ -192,8 +207,6 @@
+         return chosenDriver;
+     }
+ 
+-    // REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1 <= destination <= 5,
+-    //           0 <= drivers < number of drivers in the list, 1 <= additional <= 4
+     // MODIFIES: make the Company to book a ride and print the receipt.
+     private void receipt(int time,int start,int destination,int chosenDriver,int additional) {
+         int cost = kingdom.addRide(time, start, destination, chosenDriver, additional);
+@@ -202,7 +215,6 @@
+                 + ", our driver will contact you soon.");
+     }
+ 
+-    //REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1 <= destination <= 5, 1 <= duration <= 4
+     // EFFECTS: booking if there's no drivers in the starting zone.
+     private void addFeeBooking(int time, int start, int destination, int duration) {
+         System.out.println("There's no driver available in the zone at that time. ");
+@@ -215,49 +227,69 @@
+                 System.out.print("Sorry, there's no other drivers available at that time. We hope to see you again.");
+             } else {
+                 int chosenOne = choosingDriver(driversAvailable);
+-                if (chosenOne >= 0 && chosenOne < kingdom.numberOfDrivers()) {
+-                    int driverZone = kingdom.getDriverZone(chosenOne);
+-                    receipt(time, start, destination, chosenOne, abs(driverZone - start));
+-                }
++                int driverZone = kingdom.getDriverZone(chosenOne);
++                receipt(time, start, destination, chosenOne, abs(driverZone - start));
+             }
+         } else if (answer == 'n') {
+             System.out.println("We apologize for the inconvenience.");
++        } else {
++            incorrectInput();
+         }
+     }
+ 
+     // EFFECTS: prompt the user for the reference number of the ride for cancellation.
+-    private void option3() {
+-        if (user.numberOfRides() == 0) {
+-            System.out.println("Sorry, you did not make any booking.");
++    private void option3() throws OutOfBoundInput {
++        boolean rides = printRides();
++        if (!rides) {
++            System.out.println("(You either did not make any booking or you have reviewed your rides)");
+         } else {
+-            boolean rides = printRides();
+-            if (rides) {
+-                System.out.print("Please enter the reference number of the ride: ");
+-                int reference = input.nextInt();
+-                if (reference < user.numberOfRides() && reference >= 0) {
+-                    cancellation(reference);
+-                } else {
+-                    incorrectInput();
+-                }
+-            } else {
+-                System.out.println("Reviewed rides cannot be cancelled.");
++            System.out.print("Please enter the reference number of the ride: ");
++            int reference = input.nextInt();
++            if (reference < 0 || reference >= user.numberOfRides()) {
++                throw new OutOfBoundInput();
++            }
++            try {
++                cancellation(reference);
++            } catch (WrongRideInput e) {
++                System.out.println("Please make sure you entered the reference number provided in the list.");
+             }
+         }
+     }
+ 
+-    // REQUIRES: 0 <= rideNumber < number of rides booked
+     // EFFECTS: cancel the chosen ride of the user
+-    private void cancellation(int reference) {
+-        int cancelDriver = user.cancellable(reference);
+-        if (cancelDriver < 0) {
+-            System.out.println("Sorry, this booking cannot be cancelled.");
+-        } else {
+-            int start = user.getStartOfRide(reference);
+-            int end = user.getEndOfRide(reference);
+-            int time = user.getTimeOfRide(reference);
+-            int duration = abs(start - end) + 1;
+-            kingdom.cancellation(cancelDriver, time, duration, reference);
+-            System.out.println("Booking is cancelled, we hope to see you again.");
++    private void cancellation(int reference) throws RideCannotBeCancelled, ReviewedRideException {
++        int cancelDriver = user.getDriverOfRide(reference);
++        int start = user.getStartOfRide(reference);
++        int end = user.getEndOfRide(reference);
++        int time = user.getTimeOfRide(reference);
++        int duration = abs(start - end) + 1;
++        kingdom.cancellation(cancelDriver, time, duration, reference);
++        System.out.println("Booking is cancelled, we hope to see you again.");
++    }
++
++    // EFFECTS: saves the company state to file
++    private void saveHistory() {
++        try {
++            jsonWriter.open();
++            jsonWriter.write(kingdom);
++            jsonWriter.close();
++            System.out.println("History saved to " + JSON_FILE);
++        } catch (FileNotFoundException e) {
++            System.out.println("Unable to write to file: " + JSON_FILE);
+         }
+     }
++
++    // MODIFIES: this
++    // EFFECTS: loads company history from file
++    private void loadHistory() {
++        try {
++            kingdom = jsonReader.read();
++            System.out.println("Loaded history from " + JSON_FILE);
++            user = kingdom.getUser();
++        } catch (IOException e) {
++            System.out.println("Unable to read from file: " + JSON_FILE);
++        } catch (OutOfBoundInput e) {
++            System.out.println("Unable to add rides from file");
++        }
++    }
+ }
+Index: src/main/persistence/JsonWriter.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/persistence/JsonWriter.java b/src/main/persistence/JsonWriter.java
+new file mode 100644
+--- /dev/null	(date 1635485834953)
++++ b/src/main/persistence/JsonWriter.java	(date 1635485834953)
+@@ -0,0 +1,55 @@
++package persistence;
++
++import model.Company;
++import model.Customer;
++import org.json.JSONObject;
++
++import java.io.File;
++import java.io.FileNotFoundException;
++import java.io.PrintWriter;
++
++/******************************************
++ *    Title: JsonSerializationDemo
++ *    Author: Paul Carter
++ *    Date: 2021-03-07
++ *    Location: https://github.students.cs.ubc.ca/CPSC210/JsonSerializationDemo
++ *
++ ******************************************/
++public class JsonWriter {
++    private static final int TAB = 4;
++    private PrintWriter writer;
++    private String filename;
++
++    // EFFECTS: constructs writer to write to destination file
++    public JsonWriter(String filename) {
++        this.filename = filename;
++    }
++
++    // MODIFIES: this
++    // EFFECTS: opens writer; throws FileNotFoundException if destination file cannot
++    // be opened for writing
++    public void open() throws FileNotFoundException {
++        writer = new PrintWriter(new File(filename));
++    }
++
++    // MODIFIES: this
++    // EFFECTS: writes JSON representation of company to file
++    public void write(Company company) {
++        JSONObject companyJson = company.toJson();
++        saveToFile(companyJson.toString(TAB));
++    }
++
++    // MODIFIES: this
++    // EFFECTS: closes writer
++    public void close() {
++        writer.close();
++    }
++
++    // MODIFIES: this
++    // EFFECTS: writes string to file
++    private void saveToFile(String json) {
++        writer.print(json);
++    }
++
++
++}
+Index: .idea/libraries/json_20210307.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/libraries/json_20210307.xml b/.idea/libraries/json_20210307.xml
+new file mode 100644
+--- /dev/null	(date 1635434796857)
++++ b/.idea/libraries/json_20210307.xml	(date 1635434796857)
+@@ -0,0 +1,9 @@
++<component name="libraryTable">
++  <library name="json-20210307">
++    <CLASSES>
++      <root url="jar://$PROJECT_DIR$/lib/json-20210307.jar!/" />
++    </CLASSES>
++    <JAVADOC />
++    <SOURCES />
++  </library>
++</component>
+\ No newline at end of file
+Index: src/main/persistence/JsonReader.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/persistence/JsonReader.java b/src/main/persistence/JsonReader.java
+new file mode 100644
+--- /dev/null	(date 1635515834396)
++++ b/src/main/persistence/JsonReader.java	(date 1635515834396)
+@@ -0,0 +1,82 @@
++package persistence;
++
++import exceptions.OutOfBoundInput;
++import model.Company;
++import model.Customer;
++import org.json.JSONArray;
++import org.json.JSONObject;
++
++import java.io.IOException;
++import java.nio.charset.StandardCharsets;
++import java.nio.file.Files;
++import java.nio.file.Paths;
++import java.util.stream.Stream;
++
++import static java.lang.Math.abs;
++
++/******************************************
++ *    Title: JsonSerializationDemo
++ *    Author: Paul Carter
++ *    Date: 2021-03-07
++ *    Location: https://github.students.cs.ubc.ca/CPSC210/JsonSerializationDemo
++ *
++ ******************************************/
++// Represents a reader that reads customer from JSON data stored in file
++public class JsonReader {
++    private String source;
++
++    // EFFECTS: constructs reader to read from source file
++    public JsonReader(String source) {
++        this.source = source;
++    }
++
++    // EFFECTS: reads customer from file and returns it;
++    // throws IOException if an error occurs reading data from file
++    public Company read() throws IOException {
++        String jsonData = readFile(source);
++        JSONObject companyJson = new JSONObject(jsonData);
++        return parseCompany(companyJson);
++    }
++
++    // EFFECTS: reads source file as string and returns it
++    private String readFile(String source) throws IOException {
++        StringBuilder contentBuilder = new StringBuilder();
++
++        try (Stream<String> stream = Files.lines(Paths.get(source), StandardCharsets.UTF_8)) {
++            stream.forEach(s -> contentBuilder.append(s));
++        }
++
++        return contentBuilder.toString();
++    }
++
++    // EFFECTS: parses Company from JSON object and returns it
++    private Company parseCompany(JSONObject companyJson) {
++        JSONObject customerJson = companyJson.getJSONObject("customer");
++        Customer customer = new Customer();
++        Company company = new Company(customer);
++        addRides(company, customerJson);
++        return company;
++    }
++
++    // MODIFIES: company
++    // EFFECTS: parses rides from JSON object and adds them to company
++    private void addRides(Company company, JSONObject customerJson) {
++        JSONArray jsonArray = customerJson.getJSONArray("rides");
++        for (Object json : jsonArray) {
++            JSONObject rideJson = (JSONObject) json;
++            addRide(company, rideJson);
++        }
++    }
++
++    // MODIFIES: company
++    // EFFECTS: parses ride from JSON object and adds it to company
++    private void addRide(Company company, JSONObject customerJson) {
++        int driverNum = customerJson.getInt("driver");
++        int time = customerJson.getInt("startTime");
++        int startZone = customerJson.getInt("startZone");
++        int destination = customerJson.getInt("destination");
++        int additionalFee = customerJson.getInt("additionalFee");
++        company.addRide(time, startZone, destination, driverNum, additionalFee);
++    }
++
++}
+Index: src/main/persistence/Writable.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/persistence/Writable.java b/src/main/persistence/Writable.java
+new file mode 100644
+--- /dev/null	(date 1635448027722)
++++ b/src/main/persistence/Writable.java	(date 1635448027722)
+@@ -0,0 +1,15 @@
++package persistence;
++
++import org.json.JSONObject;
++
++/******************************************
++ *    Title: JsonSerializationDemo
++ *    Author: Paul Carter
++ *    Date: 2021-03-07
++ *    Location: https://github.students.cs.ubc.ca/CPSC210/JsonSerializationDemo
++ *
++ ******************************************/
++public interface Writable {
++    // EFFECTS: returns this as JSON object
++    JSONObject toJson();
++}
+Index: src/main/exceptions/OutOfBoundInput.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/exceptions/OutOfBoundInput.java b/src/main/exceptions/OutOfBoundInput.java
+new file mode 100644
+--- /dev/null	(date 1635494088057)
++++ b/src/main/exceptions/OutOfBoundInput.java	(date 1635494088057)
+@@ -0,0 +1,4 @@
++package exceptions;
++
++public class OutOfBoundInput extends Exception {
++}
+Index: Project-Starter.iml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<module type=\"JAVA_MODULE\" version=\"4\">\r\n  <component name=\"CheckStyle-IDEA-Module\">\r\n    <option name=\"configuration\">\r\n      <map />\r\n    </option>\r\n  </component>\r\n  <component name=\"NewModuleRootManager\" inherit-compiler-output=\"true\">\r\n    <exclude-output />\r\n    <content url=\"file://$MODULE_DIR$\">\r\n      <sourceFolder url=\"file://$MODULE_DIR$/src/test\" isTestSource=\"true\" />\r\n      <sourceFolder url=\"file://$MODULE_DIR$/src/main\" isTestSource=\"false\" />\r\n    </content>\r\n    <orderEntry type=\"inheritedJdk\" />\r\n    <orderEntry type=\"sourceFolder\" forTests=\"false\" />\r\n    <orderEntry type=\"module-library\" scope=\"TEST\">\r\n      <library name=\"JUnit5.4\">\r\n        <CLASSES>\r\n          <root url=\"jar://$MODULE_DIR$/lib/junit-jupiter-5.4.2.jar!/\" />\r\n          <root url=\"jar://$MODULE_DIR$/lib/junit-jupiter-api-5.4.2.jar!/\" />\r\n          <root url=\"jar://$MODULE_DIR$/lib/apiguardian-api-1.0.0.jar!/\" />\r\n          <root url=\"jar://$MODULE_DIR$/lib/opentest4j-1.1.1.jar!/\" />\r\n          <root url=\"jar://$MODULE_DIR$/lib/junit-platform-commons-1.4.2.jar!/\" />\r\n          <root url=\"jar://$MODULE_DIR$/lib/junit-jupiter-params-5.4.2.jar!/\" />\r\n          <root url=\"jar://$MODULE_DIR$/lib/junit-jupiter-engine-5.4.2.jar!/\" />\r\n          <root url=\"jar://$MODULE_DIR$/lib/junit-platform-engine-1.4.2.jar!/\" />\r\n        </CLASSES>\r\n        <JAVADOC />\r\n        <SOURCES />\r\n      </library>\r\n    </orderEntry>\r\n  </component>\r\n</module>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Project-Starter.iml b/Project-Starter.iml
+--- a/Project-Starter.iml	(revision 2f3b2230011d326f384079b90e353c3c7c0559b7)
++++ b/Project-Starter.iml	(date 1635434796771)
+@@ -29,5 +29,6 @@
+         <SOURCES />
+       </library>
+     </orderEntry>
++    <orderEntry type="library" name="json-20210307" level="project" />
+   </component>
+ </module>
+\ No newline at end of file
+Index: src/main/ui/Main.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package ui;\r\n\r\npublic class Main {\r\n    public static void main(String[] args) {\r\n        TaxiService forOneUser = new TaxiService();\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/ui/Main.java b/src/main/ui/Main.java
+--- a/src/main/ui/Main.java	(revision 2f3b2230011d326f384079b90e353c3c7c0559b7)
++++ b/src/main/ui/Main.java	(date 1635435812661)
+@@ -1,7 +1,13 @@
+ package ui;
+ 
++import java.io.FileNotFoundException;
++
+ public class Main {
+     public static void main(String[] args) {
+-        TaxiService forOneUser = new TaxiService();
++        try {
++            TaxiService forOneUser = new TaxiService();
++        } catch (FileNotFoundException e) {
++            System.out.println("File not found.");
++        }
+     }
+ }
+Index: src/main/exceptions/RideCannotBeCancelled.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/exceptions/RideCannotBeCancelled.java b/src/main/exceptions/RideCannotBeCancelled.java
+new file mode 100644
+--- /dev/null	(date 1635498871497)
++++ b/src/main/exceptions/RideCannotBeCancelled.java	(date 1635498871497)
+@@ -0,0 +1,4 @@
++package exceptions;
++
++public class RideCannotBeCancelled extends WrongRideInput {
++}
+Index: src/main/model/Ride.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package model;\r\n\r\nimport static java.lang.Math.abs;\r\n\r\n/*\r\n    Contains information of a ride like, the driver, starting time, original zone and destination zone.\r\n    The cost is calculated with zones and each ride is assigned to a reference number.\r\n */\r\npublic class Ride {\r\n    private int driver; // driver of the ride (represented in his/her number)\r\n    private String driverName;\r\n    private int time; // starting time\r\n    private int start; // zone of the starting position\r\n    private int destination; // zone of the destination\r\n    private int totalCost; // cost of the ride\r\n    private int withinZoneFee;\r\n    private int additionalFee;\r\n    private boolean otherZoneDriver; // true if the ride calls a driver from other zones\r\n    private boolean reviewed;\r\n\r\n\r\n\r\n    // REQUIRES: 0 <= driverNumber < the number of drivers in the list, 1 <= startZone <  5, 1 <= desZone <  5\r\n    // EFFECTS: initialize all the data member, calculate the cost of this ride,\r\n    //          assume that the ride doesn't cost any additional fee, create a reference number for this ride.\r\n    public Ride(int driverNumber, String driverName, int startZone, int desZone, int time, int oneZone, int multiZone) {\r\n        driver = driverNumber;\r\n        this.driverName = driverName;\r\n        start = startZone;\r\n        destination = desZone;\r\n        this.time = time;\r\n        withinZoneFee = oneZone;\r\n        additionalFee = multiZone;\r\n        totalCost = withinZoneFee + abs(start - destination) * additionalFee;\r\n        otherZoneDriver = false;\r\n        reviewed = false;\r\n    }\r\n\r\n    // Getters\r\n    public int getDriver() {\r\n        return driver;\r\n    }\r\n\r\n    public String getDriverName() {\r\n        return driverName;\r\n    }\r\n\r\n    public int getTotalCost() {\r\n        return totalCost;\r\n    }\r\n\r\n    public int getTime() {\r\n        return time;\r\n    }\r\n\r\n    public int getStart() {\r\n        return start;\r\n    }\r\n\r\n    public int getDestination() {\r\n        return destination;\r\n    }\r\n\r\n    public boolean getOtherZoneDriver() {\r\n        return otherZoneDriver;\r\n    }\r\n\r\n    public boolean isReviewed() {\r\n        return reviewed;\r\n    }\r\n\r\n    public void setReviewed() {\r\n        this.reviewed = true;\r\n    }\r\n\r\n    // MODIFIES: this\r\n    // EFFECTS: add the additional fee if the user chooses a driver from a further zone.\r\n    public void addFee(int times) {\r\n        totalCost = totalCost + (additionalFee * times);\r\n        otherZoneDriver = true;\r\n    }\r\n\r\n    // EFFECTS: returns a string about the starting point and destination of the ride.\r\n    public String getInformation() {\r\n        return (\"from zone \" + start + \" to zone \" + destination);\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/model/Ride.java b/src/main/model/Ride.java
+--- a/src/main/model/Ride.java	(revision 2f3b2230011d326f384079b90e353c3c7c0559b7)
++++ b/src/main/model/Ride.java	(date 1635489724870)
+@@ -1,12 +1,15 @@
+ package model;
+ 
++import org.json.JSONObject;
++import persistence.Writable;
++
+ import static java.lang.Math.abs;
+ 
+ /*
+     Contains information of a ride like, the driver, starting time, original zone and destination zone.
+     The cost is calculated with zones and each ride is assigned to a reference number.
+  */
+-public class Ride {
++public class Ride implements Writable {
+     private int driver; // driver of the ride (represented in his/her number)
+     private String driverName;
+     private int time; // starting time
+@@ -15,7 +18,7 @@
+     private int totalCost; // cost of the ride
+     private int withinZoneFee;
+     private int additionalFee;
+-    private boolean otherZoneDriver; // true if the ride calls a driver from other zones
++    private int otherZoneDriver;
+     private boolean reviewed;
+ 
+ 
+@@ -32,7 +35,7 @@
+         withinZoneFee = oneZone;
+         additionalFee = multiZone;
+         totalCost = withinZoneFee + abs(start - destination) * additionalFee;
+-        otherZoneDriver = false;
++        otherZoneDriver = 0;
+         reviewed = false;
+     }
+ 
+@@ -61,7 +64,7 @@
+         return destination;
+     }
+ 
+-    public boolean getOtherZoneDriver() {
++    public int getOtherZoneDriver() {
+         return otherZoneDriver;
+     }
+ 
+@@ -77,11 +80,24 @@
+     // EFFECTS: add the additional fee if the user chooses a driver from a further zone.
+     public void addFee(int times) {
+         totalCost = totalCost + (additionalFee * times);
+-        otherZoneDriver = true;
++        otherZoneDriver = times;
+     }
+ 
+     // EFFECTS: returns a string about the starting point and destination of the ride.
+     public String getInformation() {
+         return ("from zone " + start + " to zone " + destination);
+     }
++
++    @Override
++    public JSONObject toJson() {
++        JSONObject json = new JSONObject();
++        json.put("driver", driver);
++        json.put("startTime", time);
++        json.put("startZone", start);
++        json.put("destination", destination);
++        json.put("additionalFee", otherZoneDriver);
++
++        return json;
++    }
++
+ }
+Index: src/main/exceptions/ReviewedRideException.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/exceptions/ReviewedRideException.java b/src/main/exceptions/ReviewedRideException.java
+new file mode 100644
+--- /dev/null	(date 1635498871448)
++++ b/src/main/exceptions/ReviewedRideException.java	(date 1635498871448)
+@@ -0,0 +1,4 @@
++package exceptions;
++
++public class ReviewedRideException extends WrongRideInput {
++}
+Index: src/test/model/JsonReaderTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/model/JsonReaderTest.java b/src/test/model/JsonReaderTest.java
+new file mode 100644
+--- /dev/null	(date 1635518454180)
++++ b/src/test/model/JsonReaderTest.java	(date 1635518454180)
+@@ -0,0 +1,58 @@
++package model;
++
++import exceptions.OutOfBoundInput;
++import org.junit.jupiter.api.Test;
++import persistence.JsonReader;
++
++import java.io.IOException;
++
++import static org.junit.jupiter.api.Assertions.assertEquals;
++import static org.junit.jupiter.api.Assertions.fail;
++
++/******************************************
++ *    Title: JsonSerializationDemo
++ *    Author: Paul Carter
++ *    Date: 2021-03-07
++ *    Location: https://github.students.cs.ubc.ca/CPSC210/JsonSerializationDemo
++ *
++ ******************************************/
++public class JsonReaderTest extends JsonTest {
++    @Test
++    void testReaderNonExistentFile() {
++        JsonReader reader = new JsonReader("./data/NonExistent.json");
++        try {
++            Company company = reader.read();
++            fail();
++        } catch (IOException e) {
++            // correct
++        }
++    }
++
++    @Test
++    void testReaderEmptyCompany() {
++        JsonReader reader = new JsonReader("./data/Empty.json");
++        try {
++            Company company = reader.read();
++            Customer nullCustomer = new Customer();
++            assertEquals(null, company.getName());
++            assertEquals(0, company.numThingies());
++        } catch (IOException e) {
++            fail();
++        }
++    }
++
++    @Test
++    void testReaderGeneralCompany() {
++        JsonReader reader = new JsonReader("./data/testReaderGeneralCompany.json");
++        try {
++            Company company = reader.read();
++            assertEquals("My work room", company.getName());
++            List<Thingy> thingies = company.getThingies();
++            assertEquals(2, thingies.size());
++            checkThingy("needle", Category.STITCHING, thingies.get(0));
++            checkThingy("saw", Category.WOODWORK, thingies.get(1));
++        } catch (IOException e) {
++            fail("Couldn't read from file");
++        }
++    }
++}
+Index: src/main/exceptions/WrongRideInput.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/exceptions/WrongRideInput.java b/src/main/exceptions/WrongRideInput.java
+new file mode 100644
+--- /dev/null	(date 1635498871472)
++++ b/src/main/exceptions/WrongRideInput.java	(date 1635498871472)
+@@ -0,0 +1,4 @@
++package exceptions;
++
++public class WrongRideInput extends Exception {
++}
+Index: src/test/model/JsonTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/model/JsonTest.java b/src/test/model/JsonTest.java
+new file mode 100644
+--- /dev/null	(date 1635518454232)
++++ b/src/test/model/JsonTest.java	(date 1635518454232)
+@@ -0,0 +1,15 @@
++package model;
++
++import java.util.List;
++
++import static org.junit.jupiter.api.Assertions.assertEquals;
++import static org.junit.jupiter.api.Assertions.assertTrue;
++
++public class JsonTest {
++    protected void checkCompany(Company company, int rideNumber, int time, int start, int duration, int expectedSize) {
++        assertTrue(company.numberOfDrivers() > 0);
++        assertEquals(rideNumber, company.getUser().numberOfRides());
++        List<String> driversList = company.getDriversWithinZone(time, start, duration);
++        assertEquals(expectedSize, driversList.size());
++    }
++}
+Index: src/test/model/JsonWriterTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/model/JsonWriterTest.java b/src/test/model/JsonWriterTest.java
+new file mode 100644
+--- /dev/null	(date 1635518454205)
++++ b/src/test/model/JsonWriterTest.java	(date 1635518454205)
+@@ -0,0 +1,90 @@
++package model;
++
++import org.json.JSONObject;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.Test;
++import persistence.JsonReader;
++import persistence.JsonWriter;
++
++import java.io.IOException;
++import java.util.List;
++
++import static java.lang.Math.abs;
++import static org.junit.jupiter.api.Assertions.*;
++
++/******************************************
++ *    Title: JsonSerializationDemo
++ *    Author: Paul Carter
++ *    Date: 2021-03-07
++ *    Location: https://github.students.cs.ubc.ca/CPSC210/JsonSerializationDemo
++ *
++ ******************************************/
++public class JsonWriterTest extends JsonTest {
++    private Customer ourCustomer;
++    private Company ourCompany;
++    private int time;
++    private int start;
++    private int end;
++    private int driver;
++    private int additional;
++
++
++    @BeforeEach
++    public void setUp() {
++        time = 10;
++        start = 2;
++        end = 4;
++        driver = 3;
++        additional = abs(ourCompany.getDriverZone(driver) - start);
++        ourCustomer = new Customer();
++        ourCompany = new Company(ourCustomer);
++    }
++
++    @Test
++    void testWriterInvalidFile() {
++        try {
++            JsonWriter writer = new JsonWriter("./data/my\0illegal:fileName.json");
++            writer.open();
++            fail("An IOException should have occurred");
++        } catch (IOException e) {
++            // correct
++        }
++    }
++
++    @Test
++    void testWriterEmptyCompany() {
++        try {
++            JsonWriter writer = new JsonWriter("./data/testWriterEmptyCompany.json");
++            writer.open();
++            writer.write(ourCompany);
++            writer.close();
++
++            JsonReader reader = new JsonReader("./data/testWriterEmptyCompany.json");
++            Company loadedCompany = reader.read();
++            checkCompany(loadedCompany, 0, 0, 1, 22, loadedCompany.numberOfDrivers());
++        } catch (IOException e) {
++            fail("There should be no IOException ");
++        }
++    }
++
++    @Test
++    void testWriterGeneralCompany() {
++        try {
++            ourCompany.addRide(time, start, end, driver, additional);
++            JsonWriter writer = new JsonWriter("./data/testWriterGeneralCompany.json");
++            writer.open();
++            writer.write(ourCompany);
++            writer.close();
++
++            JsonReader reader = new JsonReader("./data/testWriterGeneralCompany.json");
++            Company loadedCompany = reader.read();
++            checkCompany(loadedCompany, 1, time, start, abs(start - end), 0);
++            List<String> driversAvailable = loadedCompany.getDriversOutOfZone(time, start, abs(start - end));
++            assertEquals(loadedCompany.numberOfDrivers() - 1, driversAvailable.size());
++        } catch (IOException e) {
++            fail("Exception should not have been thrown");
++        }
++    }
++
++
++}
+Index: README.md
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># Taxi Service\r\n\r\n## Ride booking system for a day \r\nAuthor: Choi Ian Leong, Taylor\r\n\r\n***About This Application*** \\\r\nThe application provides a ride booking system for customers within 5 zones. \r\nThe bookings can only be made on the same day and fees are charged according to the distance between zones. \r\nDistance and duration of ride is determined by the difference of zone number.\r\nA ride within one zone takes 1 hour, ride between zones takes (1 + difference) hours. \r\nBooking can only be cancelled if the driver is in the starting zone before the ride and the booking is not rated.\r\nIn other words, if the user is choosing a driver from another zone, that ride cannot be cancelled.\r\n\r\nThis application is different from other ride service, customers get to choose the drivers on their own according to the rating of drivers.\r\nIf there's no drivers available in the zone, customer can choose a driver from another zone. \r\nHowever, choosing drivers from other zone will cost additional fee and cannot be cancelled.\r\nThis application is provided for all individuals living within the 5 zones.\r\nZones are not specified to any location in real life in this application just to make the application portable.\r\nMeaning that the application is applicable to any places that can be divided into 5 zones.\r\n\r\n***Interest*** \\\r\nI'm interested in making this taxi service application because we don't get to choose the drivers in most of the ride booking system nowadays.\r\nSometimes, we may be matched with relatively worse drivers, the driver could be bad in driving or in attitude.\r\nAnd I understand as a customer, I don't want to pay for an unpleasant ride, it's better to choose the drivers we want.\r\nThis system can also force the drivers to improve their skills or attitude, which makes unpleasant rides avoidable.\r\n\r\n\r\n## user stories\r\nAs a user, I want to be able to book a ride on the day.\\\r\nAs a user, I want to be able to book multiple rides on the day.\\\r\nAs a user, I want to be able to cancel the booking(s) of my ride(s).\\\r\nAs a user, I want to be able to give a review to my ride(s).\\\r\nAs a user, I want to be able to choose my own choice of driver.\\\r\nAs a user, I want to be able to look at the price table of the service.\\\r\n\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/README.md b/README.md
+--- a/README.md	(revision 2f3b2230011d326f384079b90e353c3c7c0559b7)
++++ b/README.md	(date 1635430374100)
+@@ -32,5 +32,7 @@
+ As a user, I want to be able to give a review to my ride(s).\
+ As a user, I want to be able to choose my own choice of driver.\
+ As a user, I want to be able to look at the price table of the service.\
++As a user, I want to be able to save my ride history to file. \
++As a user, I want to be able to load my previous ride from file. 
+ 
+ 
+diff --git a/data/testWriterEmptyCompany.json b/data/testWriterEmptyCompany.json
+new file mode 100644
+diff --git a/data/testWriterGeneralCompany.json b/data/testWriterGeneralCompany.json
+new file mode 100644

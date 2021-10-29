@@ -1,58 +1,64 @@
 package model;
 
+import exceptions.ReviewedRideException;
+import exceptions.RideCannotBeCancelled;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import persistence.Writable;
+
 import java.util.ArrayList;
 import java.util.List;
 
-// A customer contains a list of booking.
-public class Customer {
-    private List<Ride> rides; // list of booking
+// Represents a customer booking rides from the company
+public class Customer implements Writable {
+    private List<Ride> rides; // ride history of the customer
 
     // EFFECTS: initialize the booking list to empty.
     public Customer() {
         rides = new ArrayList<>();
     }
 
-    // EFFECTS: returns that number of bookings.
+    // EFFECTS: returns the number of bookings.
     public int numberOfRides() {
         return (rides.size());
     }
 
-    // REQUIRES: 0 <= reference < number of rides in the list
-    // EFFECTS: return the driver of the corresponding ride.
+    // REQUIRES: 0 <= reference < number of rides booked
+    // EFFECTS: returns the driver of the given ride.
     public int getDriverOfRide(int reference) {
         return rides.get(reference).getDriver();
     }
 
     // REQUIRES: 0 <= reference < number of rides in the list
-    // EFFECTS: return the starting zone of the corresponding ride.
+    // EFFECTS: returns the starting zone of the given ride.
     public int getStartOfRide(int reference) {
         return rides.get(reference).getStart();
     }
 
     // REQUIRES: 0 <= reference < number of rides in the list
-    // EFFECTS: return the destination of the corresponding ride.
+    // EFFECTS: returns the destination of the given ride.
     public int getEndOfRide(int reference) {
         return rides.get(reference).getDestination();
     }
 
     // REQUIRES: 0 <= reference < number of rides in the list
-    // EFFECTS: return the time of the corresponding ride.
+    // EFFECTS: returns the time of the given ride.
     public int getTimeOfRide(int reference) {
         return rides.get(reference).getTime();
     }
 
     // REQUIRES: 0 <= reference < number of rides in the list
     // MODIFIES: this
-    // EFFECTS: return true if successfully review the ride.
-    public boolean changeReviewStateOfRide(int reference) {
-        if (rides.isEmpty() || rides.get(reference).isReviewed()) {
-            return false;
+    // EFFECTS: rates the driver if the ride is not reviewed
+    //          throws an exception if the ride has been reviewed
+    public void changeReviewStateOfRide(int reference) throws ReviewedRideException {
+        if (rides.get(reference).isReviewed()) {
+            throw new ReviewedRideException();
         }
         rides.get(reference).setReviewed();
-        return true;
     }
 
-    // EFFECTS: prints a list of rides the user booked.
+    // EFFECTS: returns a list of rides the user booked.
     public List<String> getRideHistory() {
         ArrayList<String> outputInformation = new ArrayList<>();
         String information;
@@ -71,7 +77,9 @@ public class Customer {
         REQUIRES: 0 <= time <= 23, 1 <= start <= 5, 1 <= destination <= 5,
                   0 <= selected < number of drivers created, 0 <= additional <= 4
         MODIFIES: this
-        EFFECTS: add a ride to the list, add the additional fee if driver is not at the starting zone.
+        EFFECTS: adds a ride to the list
+                 adds the additional fee if given.
+                 returns the cost of the ride.
      */
     public int addRide(int time, int start, int end, int selected, int additional, String name, int cost, int fee) {
         Ride newRide = new Ride(selected, name, start, end, time, cost, fee);
@@ -83,18 +91,32 @@ public class Customer {
         return totalCost;
     }
 
-    // REQUIRES: 0 <= reference < number of rides in the list
-    // EFFECTS: returns the driver number of the ride if it can be cancelled.
-    public int cancellable(int reference) {
-        if (rides.isEmpty() || rides.get(reference).getOtherZoneDriver()) {
-            return -1;
-        }
-        return rides.get(reference).getDriver();
-    }
 
     // REQUIRES: 0 <= reference < number of rides in the list
-    // EFFECTS: remove the given ride from the list.
-    public void cancel(int reference) {
+    // EFFECTS: removes the given ride from the list if it's an accessible ride.
+    //          throws an exception otherwise
+    public void cancel(int reference) throws ReviewedRideException, RideCannotBeCancelled {
+        if (rides.get(reference).isReviewed()) {
+            throw new ReviewedRideException();
+        } else if (rides.get(reference).getOtherZoneDriver() > 0) {
+            throw new RideCannotBeCancelled();
+        }
         rides.remove(reference);
+    }
+
+    @Override
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+        json.put("rides", ridesToJson());
+        return json;
+    }
+
+    // EFFECTS: returns rides of this customer as a JSON array
+    private JSONArray ridesToJson() {
+        JSONArray jsonArray = new JSONArray();
+        for (Ride r : rides) {
+            jsonArray.put(r.toJson());
+        }
+        return jsonArray;
     }
 }
