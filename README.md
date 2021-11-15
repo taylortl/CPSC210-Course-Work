@@ -31,6 +31,8 @@ As a user, I want to be able to book multiple rides on the day.\
 As a user, I want to be able to cancel the booking(s) of my ride(s).\
 As a user, I want to be able to give a review to my ride(s).\
 As a user, I want to be able to choose my own choice of driver.\
-As a user, I want to be able to look at the price table of the service.
+As a user, I want to be able to look at the price table of the service.\
+As a user, I want to be able to save my ride history.\
+As a user, I want to be able to load my previous ride history.
 
 

@@ -1,6 +1,7 @@
-package model;
+package persistence;
 
 import exceptions.DriversOffWork;
+import model.Company;
 
 import java.util.List;
 

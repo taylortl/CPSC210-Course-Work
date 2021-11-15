@@ -181,7 +181,6 @@ public class TaxiService {
 
     // EFFECTS: prompts the user for time, origin, destination of the ride for booking.
     private void option2() throws OutOfBoundInput, DriversOffWork {
-        boolean correctInput = true;
         System.out.print("Please enter the time of your appointment(0-23): ");
         int time = input.nextInt();
         System.out.print("Please enter the zone of your starting point(1 - 5): ");

@@ -1,10 +1,10 @@
-package model;
+package persistence;
 
 import exceptions.DriversOffWork;
+import model.Company;
+import model.Customer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import persistence.JsonReader;
-import persistence.JsonWriter;
 
 import java.io.IOException;
 import java.util.List;
