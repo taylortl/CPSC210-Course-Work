@@ -3,7 +3,6 @@ package ui;
 import exceptions.DriversOffWork;
 import exceptions.ReviewedRideException;
 import exceptions.RideCannotBeCancelled;
-import exceptions.WrongRideInput;
 import model.Company;
 import model.Customer;
 import persistence.JsonReader;
@@ -23,8 +22,8 @@ import java.util.List;
 import static java.lang.Math.abs;
 
 public class ServiceInterface extends JFrame {
-    private static final int WIDTH = 800;
-    private static final int HEIGHT = 600;
+    private static final int WIDTH = 700;
+    private static final int HEIGHT = 400;
 
     private static final String JSON_FILE = "./data/kingdom.json";
     private JsonWriter jsonWriter;
@@ -53,7 +52,7 @@ public class ServiceInterface extends JFrame {
 
     private void addButton() {
         buttonPanel = new JPanel();
-        buttonPanel.setPreferredSize(new Dimension(WIDTH / 3, HEIGHT));
+        buttonPanel.setPreferredSize(new Dimension(WIDTH / 4, HEIGHT));
         buttonPanel.setLayout(new GridBagLayout());
         JButton printPrice = new JButton(new PrintPrice());
         JButton rateDrivers = new JButton(new RateDrivers());
@@ -96,7 +95,7 @@ public class ServiceInterface extends JFrame {
         format.gridwidth = GridBagConstraints.REMAINDER;
         format.fill = GridBagConstraints.HORIZONTAL;
         outputPanel = new JPanel();
-        outputPanel.setPreferredSize(new Dimension(WIDTH * 2 / 3, HEIGHT));
+        outputPanel.setPreferredSize(new Dimension(WIDTH * 3 / 4, HEIGHT));
         outputPanel.setLayout(new GridBagLayout());
         addButton();
     }
@@ -309,7 +308,7 @@ public class ServiceInterface extends JFrame {
                 booking(time, start, destination, duration);
             } catch (OutOfBoundInput ex) {
                 removeComponents();
-                JLabel wrongInput = new JLabel("An invalid reference number.");
+                JLabel wrongInput = new JLabel("An invalid number.");
                 outputPanel.add(wrongInput, format);
                 updatePanel();
             } catch (DriversOffWork ex) {
