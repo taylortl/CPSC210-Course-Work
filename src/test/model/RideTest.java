@@ -20,7 +20,7 @@ public class RideTest {
     @BeforeEach
     public void setUp() {
         numberOne = new Ride(driver, name, start, end, time, withinZoneCost, multiZonesCost);
-        numberTwo = new Ride(driver, name, start, end, time, withinZoneCost, multiZonesCost, true);
+        numberTwo = new Ride(driver, name, start, end, time, withinZoneCost, multiZonesCost, 3);
     }
 
     @Test
@@ -66,7 +66,7 @@ public class RideTest {
 
     @Test
     public void testReview() {
-        numberOne.setReviewed();
+        numberOne.setReviewed(3);
         assertTrue(numberOne.isReviewed());
     }
 

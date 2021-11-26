@@ -2,6 +2,8 @@ package persistence;
 
 import model.Company;
 import model.Customer;
+import model.Event;
+import model.EventLog;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -73,7 +75,7 @@ public class JsonReader {
         int startZone = rideJson.getInt("startZone");
         int destination = rideJson.getInt("destination");
         int additionalFee = rideJson.getInt("additionalFee");
-        boolean reviewed = rideJson.getBoolean("reviewed");
+        double reviewed = rideJson.getDouble("reviewed");
         company.addOldRide(time, startZone, destination, driverNum, additionalFee, reviewed);
     }
 

@@ -1,0 +1,18 @@
+{"customer": {"rides": [
+    {
+        "additionalFee": 0,
+        "driver": 2,
+        "startZone": 3,
+        "destination": 2,
+        "reviewed": 4.6,
+        "startTime": 5
+    },
+    {
+        "additionalFee": 0,
+        "driver": 5,
+        "startZone": 1,
+        "destination": 1,
+        "reviewed": -1,
+        "startTime": 0
+    }
+]}}

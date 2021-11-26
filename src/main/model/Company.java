@@ -58,6 +58,10 @@ public class Company implements Writable {
         return drivers.get(driver).getZone();
     }
 
+    public int getDriverZoneAtTime(int driver, int time) {
+        return drivers.get(driver).getAvailability(time);
+    }
+
     // MODIFIES: this
     // EFFECTS: adds drivers to the service
     //          2 drivers in zone 1,
@@ -72,14 +76,16 @@ public class Company implements Writable {
     }
 
     /*
-       REQUIRES: 0 <= reference < number of rides booked, 0<= rating <=5,
+       REQUIRES: 0 <= reference < number of rides booked, 0 <= rating <=5,
                  0 <= drivers < number of drivers in the list
        MODIFIES: this
        EFFECTS: changes the rating of the given driver if possible.
      */
     public void rateDriver(int reference, double rating, int driver) throws ReviewedRideException {
-        user.changeReviewStateOfRide(reference);
+        String description = user.changeReviewStateOfRide(reference, rating);
         drivers.get(driver).changeRating(rating);
+        description += "\n" + drivers.get(driver).getName() + " rated " + rating + " / 5.0";
+        EventLog.getInstance().logEvent(new Event(description));
     }
 
     // REQUIRES: 0 <= time <= 22, 1 <= zone <= 5
@@ -130,7 +136,7 @@ public class Company implements Writable {
                 }
                 if (foundDrivers) {
                     driverInfo = i + ": " + drivers.get(i).getInformation();
-                    driverInfo += " (+$" + getAddedFee(i, start) + ")";
+                    driverInfo += " (+$" + getAddedFee(i, start, time) + ")";
                     driversAvailable.add(driverInfo);
                 }
             }
@@ -140,8 +146,8 @@ public class Company implements Writable {
 
     // REQUIRES: 0 <= driver < number of drivers created, 1 <= start <= 5
     // EFFECTS: returns the additional fee needed to book this driver.
-    public int getAddedFee(int driver, int start) {
-        int zone = getDriverZone(driver);
+    public int getAddedFee(int driver, int start, int time) {
+        int zone = getDriverZoneAtTime(driver, time);
         return (ADDITIONAL_FEE * abs(zone - start));
     }
 
@@ -155,7 +161,7 @@ public class Company implements Writable {
                 returns the cost of the added ride.
     */
     public int addRide(int time, int start, int destination, int selected, int additional) {
-        return addOldRide(time, start, destination, selected, additional, false);
+        return addOldRide(time, start, destination, selected, additional, -1);
     }
 
     /*
@@ -167,9 +173,15 @@ public class Company implements Writable {
                 additional cost needed for cross-zones rides,
                 returns the cost of the added ride.
     */
-    public int addOldRide(int time, int start, int destination, int selected, int additional, boolean reviewed) {
+    public int addOldRide(int time, int start, int destination, int selected, int additional, double reviewed) {
         drivers.get(selected).changeAvailability(time, abs(start - destination) + 1, destination);
+        if (reviewed > 0) {
+            drivers.get(selected).changeRating(reviewed);
+        }
         String name = drivers.get(selected).getName();
+        String description = "Ride made: from zone " + start + " to zone "
+                + destination + " at " + time + ":00 by " + name;
+        EventLog.getInstance().logEvent(new Event(description));
         return user.addOldRide(time, start, destination, selected, additional, name,
                 ONE_ZONE_COST, ADDITIONAL_FEE, reviewed);
     }
@@ -184,8 +196,9 @@ public class Company implements Writable {
      */
     public void cancellation(int driver, int time, int duration, int reference)
             throws ReviewedRideException, RideCannotBeCancelled {
-        user.cancel(reference);
+        String description = user.cancel(reference);
         drivers.get(driver).availableAgain(time, duration);
+        EventLog.getInstance().logEvent(new Event(description));
     }
 
     @Override

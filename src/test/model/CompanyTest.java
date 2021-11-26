@@ -33,7 +33,7 @@ public class CompanyTest {
         end = 4;
         driver = 3;
         duration = abs(end - start);
-        additional = abs(ourCompany.getDriverZone(driver) - start);
+        additional = abs(ourCompany.getDriverZoneAtTime(driver, time) - start);
         withinZoneCost = ourCompany.getOneZoneCost();
         multiZonesCost = ourCompany.getAdditionalFee();
     }
@@ -49,11 +49,28 @@ public class CompanyTest {
     }
 
     @Test
+    public void testGetDriverZoneAtTime() {
+        assertEquals(ourCompany.getDriverZone(driver), ourCompany.getDriverZoneAtTime(driver, time + duration + 1));
+        ourCompany.addRide(time, start , end, driver, additional);
+        assertEquals(end, ourCompany.getDriverZoneAtTime(driver, time + duration + 1));
+    }
+
+    @Test
     public void testAddRide() {
         int cost = ourCompany.addRide(time, start, end, driver, additional);
         int expectedCost = withinZoneCost + (abs(start - end) + additional) * multiZonesCost;
         assertEquals(expectedCost, cost);
     }
+
+    @Test
+    public void testAddOldRide() {
+        int cost = ourCompany.addOldRide(time, start, end, driver, additional, 5);
+        int expectedCost = withinZoneCost + (abs(start - end) + additional) * multiZonesCost;
+        assertEquals(expectedCost, cost);
+        assertEquals(0,  ourCompany.getUser().getRideHistory().size());
+        assertEquals(1, ourCompany.getUser().numberOfRides());
+    }
+
 
     @Test
     public void testWriteReviewWithRide() {
@@ -87,7 +104,7 @@ public class CompanyTest {
     }
 
     @Test
-    public void testGetDriversWithinZonWithoutRides() {
+    public void testGetDriversWithinZoneWithoutRides() {
         List<String> driversAvailable;
         try {
             for (int i = 1; i < 6; i++) {
@@ -188,7 +205,7 @@ public class CompanyTest {
 
     @Test
     public void testGetAddedFeeDifferentZone() {
-        int fee = ourCompany.getAddedFee(driver, start);
+        int fee = ourCompany.getAddedFee(driver, start, time);
         int expected = additional * multiZonesCost;
         assertEquals(expected, fee);
     }
@@ -197,7 +214,7 @@ public class CompanyTest {
     public void testGetAddedFeeSameZone() {
         int driver = 0;
         int startZone = ourCompany.getDriverZone(0);
-        int fee = ourCompany.getAddedFee(driver, startZone);
+        int fee = ourCompany.getAddedFee(driver, startZone, time);
         int expected = 0;
         assertEquals(expected, fee);
 

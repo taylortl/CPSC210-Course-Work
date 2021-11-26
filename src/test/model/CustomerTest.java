@@ -69,7 +69,7 @@ public class CustomerTest {
     public void testReviewWithRide() {
         user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
         try {
-            user.changeReviewStateOfRide(0);
+            user.changeReviewStateOfRide(0, 3);
         } catch (ReviewedRideException e) {
             fail("There should be no ReviewedRideException");
         }
@@ -79,12 +79,12 @@ public class CustomerTest {
     public void testReviewWithReviewedRide() {
         user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
         try {
-            user.changeReviewStateOfRide(0);
+            user.changeReviewStateOfRide(0, 3);
         } catch (ReviewedRideException e) {
             fail("There should be no ReviewedRideException");
         }
         try {
-            user.changeReviewStateOfRide(0);
+            user.changeReviewStateOfRide(0, 3);
             fail("ReviewedRideException should have occurred");
         } catch (ReviewedRideException e) {
             // correct
@@ -108,7 +108,7 @@ public class CustomerTest {
     public void testRideHistoryWithReviewedRide() {
         user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
         try {
-            user.changeReviewStateOfRide(0);
+            user.changeReviewStateOfRide(0, 3);
         } catch (ReviewedRideException e) {
             fail("There should be no ReviewedRideException");
         }
@@ -120,7 +120,7 @@ public class CustomerTest {
     public void testCancelReviewedRide() {
         user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
         try {
-            user.changeReviewStateOfRide(0);
+            user.changeReviewStateOfRide(0, 3);
             user.cancel(0);
             fail("ReviewedRideException should have occurred");
         } catch (ReviewedRideException e) {

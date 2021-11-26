@@ -58,11 +58,12 @@ public class Customer implements Writable {
     // MODIFIES: this
     // EFFECTS: rates the driver if the ride is not reviewed
     //          throws an exception if the ride has been reviewed
-    public void changeReviewStateOfRide(int reference) throws ReviewedRideException {
+    public String changeReviewStateOfRide(int reference, double rating) throws ReviewedRideException {
         if (rides.get(reference).isReviewed()) {
             throw new ReviewedRideException();
         }
-        rides.get(reference).setReviewed();
+        rides.get(reference).setReviewed(rating);
+        return "Ride rated: " + rides.get(reference).getInformation();
     }
 
     // EFFECTS: returns a list of rides the user booked.
@@ -90,11 +91,11 @@ public class Customer implements Writable {
      */
     public int addRide(int time, int start, int end, int selected, int additional,
                        String name, int cost, int fee) {
-        return addOldRide(time, start, end, selected, additional, name, cost, fee, false);
+        return addOldRide(time, start, end, selected, additional, name, cost, fee, -1);
     }
 
     public int addOldRide(int time, int start, int end, int selected, int additional,
-                       String name, int cost, int fee, boolean reviewed) {
+                       String name, int cost, int fee, double reviewed) {
         Ride newRide = new Ride(selected, name, start, end, time, cost, fee, reviewed);
         if (additional > 0) {
             newRide.addFee(additional);
@@ -108,13 +109,15 @@ public class Customer implements Writable {
     // REQUIRES: 0 <= reference < number of rides in the list
     // EFFECTS: removes the given ride from the list if it's an accessible ride.
     //          throws an exception otherwise
-    public void cancel(int reference) throws ReviewedRideException, RideCannotBeCancelled {
+    public String cancel(int reference) throws ReviewedRideException, RideCannotBeCancelled {
         if (rides.get(reference).isReviewed()) {
             throw new ReviewedRideException();
         } else if (rides.get(reference).getOtherZoneDriver() > 0) {
             throw new RideCannotBeCancelled();
         }
+        String description = "Ride cancelled: " + rides.get(reference).getInformation();
         rides.remove(reference);
+        return description;
     }
 
     @Override

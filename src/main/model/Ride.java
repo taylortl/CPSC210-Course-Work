@@ -19,7 +19,7 @@ public class Ride implements Writable {
     private int withinZoneFee; // cost of within-zone rides
     private int additionalFee; // additional cost for each zone crossed
     private int otherZoneDriver; // additional cost for calling drivers from other zones
-    private boolean reviewed;
+    private double reviewed;
 
 
 
@@ -30,17 +30,17 @@ public class Ride implements Writable {
     //          assumes that the ride doesn't cost any additional fee
     //          create a reference number for this ride.
     public Ride(int driverNumber, String driverName, int startZone, int desZone, int time,
-                int oneZone, int multiZone, boolean reviewed) {
+                int oneZone, int multiZone, double reviewed) {
         setUp(driverNumber, driverName, startZone, desZone, time, oneZone, multiZone, reviewed);
     }
 
     public Ride(int driverNumber, String driverName, int startZone, int desZone, int time,
                 int oneZone, int multiZone) {
-        setUp(driverNumber, driverName, startZone, desZone, time, oneZone, multiZone, false);
+        setUp(driverNumber, driverName, startZone, desZone, time, oneZone, multiZone, -1);
     }
 
     private void setUp(int driverNumber, String driverName, int startZone, int desZone, int time,
-                       int oneZone, int multiZone, boolean reviewed) {
+                       int oneZone, int multiZone, double reviewed) {
         driver = driverNumber;
         this.driverName = driverName;
         start = startZone;
@@ -83,11 +83,11 @@ public class Ride implements Writable {
     }
 
     public boolean isReviewed() {
-        return reviewed;
+        return (reviewed != -1);
     }
 
-    public void setReviewed() {
-        this.reviewed = true;
+    public void setReviewed(double rating) {
+        this.reviewed = rating;
     }
 
     // REQUIRES: times > 0
