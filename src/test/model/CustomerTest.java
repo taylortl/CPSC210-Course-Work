@@ -92,20 +92,27 @@ public class CustomerTest {
     }
 
     @Test
-    public void testRideHistoryWithoutRide() {
+    public void testUnreviewedRideHistoryWithoutRide() {
         List<String> history = user.getRideHistoryUnReviewed();
         assertTrue(history.isEmpty());
     }
 
     @Test
-    public void testRideHistoryWithRide() {
+    public void testUnreviewedRideHistoryWithRide() {
         user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
         List<String> history = user.getRideHistoryUnReviewed();
         assertTrue(history.size() > 0);
     }
 
     @Test
-    public void testRideHistoryWithReviewedRide() {
+    public void testRideHistory() {
+        user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
+        List<String> history = user.getRideHistory();
+        assertTrue(history.size() > 0);
+    }
+
+    @Test
+    public void testUnreviewedRideHistoryWithReviewedRide() {
         user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
         try {
             user.changeReviewStateOfRide(0, 3);
