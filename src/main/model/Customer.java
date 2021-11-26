@@ -86,10 +86,10 @@ public class Customer implements Writable {
         ArrayList<String> outputInformation = new ArrayList<>();
         String information;
         for (int i = 0; i < rides.size(); i++) {
-                information = i + ": ";
-                information += rides.get(i).getDriverName() + " driving you ";
-                information += rides.get(i).getInformation();
-                outputInformation.add(information);
+            information = i + ": ";
+            information += rides.get(i).getDriverName() + " driving you ";
+            information += rides.get(i).getInformation();
+            outputInformation.add(information);
         }
         return outputInformation;
     }
