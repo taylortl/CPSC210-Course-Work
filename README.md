@@ -58,7 +58,19 @@ Thu Nov 25 18:27:03 PST 2021
 Ride history saved
 
 ##Phase4: Task 3
-Reflection: If I have more time, I would make the application available for multiple users instead of 1 user.
+I understand that my structure in ServiceInterface is a little messy. 
+If I have more time to work on, I would separate ActionListener classes from the user interface class.
+It is more appropriate to create separate classes for the Buttons 
+than making them as instance of the ServiceInterface object. 
+
+On the other hand, it is not efficient to create the driver list everytime the application run. 
+If the application has more than 6 drivers, it would be a lot of works for the program.
+Instead, I would create a json file / Excel file of drivers, and read the information from the file if needed.
+Such that we don't need to create the driver object, we just need JsonReader / FileReader to get the information.
+Same logic could be applied to Customer object if I have not just 1 customer to serve.
+
+For the exceptions, WrongInputDriver exception could be implemented as a child of the OurOfBoundInput exception,
+such that all the exceptions will be under the same package, and the two exceptions can be handled as one.
 
 
 

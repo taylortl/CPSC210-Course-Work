@@ -9,6 +9,7 @@ import org.json.JSONObject;
  *    Location: https://github.students.cs.ubc.ca/CPSC210/JsonSerializationDemo
  *
  ******************************************/
+// Represents an interface that can be converted to Json object
 public interface Writable {
     // EFFECTS: returns this as JSON object
     JSONObject toJson();

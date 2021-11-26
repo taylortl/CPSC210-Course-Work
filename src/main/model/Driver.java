@@ -43,21 +43,17 @@ public class Driver {
         return zone;
     }
 
-    /*
-        REQUIRES: 0 <= time <= 23
-        EFFECTS: returns 0 if the driver is not available at the given time.
-                 Else, returns the location (zone) of the driver at the given time.
-     */
+    // REQUIRES: 0 <= time <= 23
+    // EFFECTS: returns 0 if the driver is not available at the given time.
+    //          Else, returns the location (zone) of the driver at the given time.
     public int getAvailability(int time) {
         return (availability[time]);
     }
 
-    /*
-        REQUIRES: 0 <= time <= 22, 1 <= destination <= 5
-        MODIFIES: this
-        EFFECTS: driver becomes unavailable during a ride,
-                 and the driver's location is changed to the destination after the ride.
-     */
+    // REQUIRES: 0 <= time <= 22, 1 <= destination <= 5
+    // MODIFIES: this
+    // EFFECTS: driver becomes unavailable during a ride,
+    //          and the driver's location is changed to the destination after the ride.
     public void changeAvailability(int time, int duration, int destination) {
         Arrays.fill(availability, time, (time + duration), 0);
         for (int i = time + duration; i < availability.length; i++) {
@@ -69,10 +65,9 @@ public class Driver {
         }
     }
 
-    /*
-        REQUIRES: 0 <= time <= 23, 1 <= duration <= 4
-        MODIFIES: this
-     */
+    // REQUIRES: 0 <= time <= 23, 1 <= duration <= 4
+    // MODIFIES: this
+    // EFFECTS: the driver will be available at the given time for the given duration
     public void availableAgain(int time, int duration) {
         if (time == 0) {
             Arrays.fill(availability, time, (time + duration), zone);
@@ -81,18 +76,16 @@ public class Driver {
         }
     }
 
-    /*
-        REQUIRES: 0 <= newRate <= 5
-        MODIFIES: this
-        EFFECTS: updates the rating of this driver.
-     */
+    // REQUIRES: 0 <= newRate <= 5
+    // MODIFIES: this
+    // EFFECTS: updates the rating of this driver.
     public void changeRating(double newRate) {
         rating = (rating + newRate) / 2;
     }
 
     // EFFECTS: returns a string telling the name and rating of the driver.
     public String getInformation() {
-        return (name + " - " + rating + "/5");
+        return (name + " - " + rating + "/5.0");
     }
 
 }

@@ -93,14 +93,14 @@ public class CustomerTest {
 
     @Test
     public void testRideHistoryWithoutRide() {
-        List<String> history = user.getRideHistory();
+        List<String> history = user.getRideHistoryUnReviewed();
         assertTrue(history.isEmpty());
     }
 
     @Test
     public void testRideHistoryWithRide() {
         user.addRide(time, start, end, driver, additional, name, withinZoneCost, multiZonesCost);
-        List<String> history = user.getRideHistory();
+        List<String> history = user.getRideHistoryUnReviewed();
         assertTrue(history.size() > 0);
     }
 
@@ -112,7 +112,7 @@ public class CustomerTest {
         } catch (ReviewedRideException e) {
             fail("There should be no ReviewedRideException");
         }
-        List<String> history = user.getRideHistory();
+        List<String> history = user.getRideHistoryUnReviewed();
         assertTrue(history.isEmpty());
     }
 

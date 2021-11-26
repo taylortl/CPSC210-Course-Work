@@ -11,7 +11,6 @@ import java.util.Date;
  *    Location: https://github.students.cs.ubc.ca/CPSC210/AlarmSystem
  *
  ******************************************/
-
 //Represents a ride booking system event.
 public class Event {
     private static final int HASH_CONSTANT = 13;
@@ -24,6 +23,7 @@ public class Event {
         this.description = description;
     }
 
+    // Getters
     public Date getDate() {
         return dateLogged;
     }

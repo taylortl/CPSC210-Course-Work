@@ -25,20 +25,26 @@ public class Ride implements Writable {
 
     // REQUIRES: 0 <= driverNumber < the number of drivers in the list, 1 <= startZone <  5, 1 <= desZone <  5
     //           0 <= time <= 22, oneZone > 0, multiZone > 0
-    // EFFECTS: initializes all the data member
-    //          calculate the cost of this ride,
-    //          assumes that the ride doesn't cost any additional fee
-    //          create a reference number for this ride.
+    // EFFECTS: initialize a Ride object with a given reviewed value
     public Ride(int driverNumber, String driverName, int startZone, int desZone, int time,
                 int oneZone, int multiZone, double reviewed) {
         setUp(driverNumber, driverName, startZone, desZone, time, oneZone, multiZone, reviewed);
     }
 
+    // REQUIRES: 0 <= driverNumber < the number of drivers in the list, 1 <= startZone <  5, 1 <= desZone <  5
+    //           0 <= time <= 22, oneZone > 0, multiZone > 0
+    // EFFECTS: initialize a Ride object with a reviewed value as - 1 (not reviewed)
     public Ride(int driverNumber, String driverName, int startZone, int desZone, int time,
                 int oneZone, int multiZone) {
         setUp(driverNumber, driverName, startZone, desZone, time, oneZone, multiZone, -1);
     }
 
+    // REQUIRES: 0 <= driverNumber < the number of drivers in the list, 1 <= startZone <  5, 1 <= desZone <  5
+    //           0 <= time <= 22, oneZone > 0, multiZone > 0
+    // EFFECTS: initializes all the data member
+    //          calculate the cost of this ride,
+    //          assumes that the ride doesn't cost any additional fee
+    //          create a reference number for this ride.
     private void setUp(int driverNumber, String driverName, int startZone, int desZone, int time,
                        int oneZone, int multiZone, double reviewed) {
         driver = driverNumber;
@@ -100,10 +106,10 @@ public class Ride implements Writable {
 
     // EFFECTS: returns a string about the information of the ride.
     public String getInformation() {
-
         return ("from zone " + start + " to zone " + destination + " at " + time + ":00");
     }
 
+    // EFFECTS: returns a Json object of the Ride object
     @Override
     public JSONObject toJson() {
         JSONObject json = new JSONObject();

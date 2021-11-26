@@ -66,8 +66,8 @@ public class Customer implements Writable {
         return "Ride rated: " + rides.get(reference).getInformation();
     }
 
-    // EFFECTS: returns a list of rides the user booked.
-    public List<String> getRideHistory() {
+    // EFFECTS: returns a list of unreviewed rides the user booked.
+    public List<String> getRideHistoryUnReviewed() {
         ArrayList<String> outputInformation = new ArrayList<>();
         String information;
         for (int i = 0; i < rides.size(); i++) {
@@ -77,6 +77,19 @@ public class Customer implements Writable {
                 information += rides.get(i).getInformation();
                 outputInformation.add(information);
             }
+        }
+        return outputInformation;
+    }
+
+    // EFFECTS: returns a list of rides the user booked.
+    public List<String> getRideHistory() {
+        ArrayList<String> outputInformation = new ArrayList<>();
+        String information;
+        for (int i = 0; i < rides.size(); i++) {
+                information = i + ": ";
+                information += rides.get(i).getDriverName() + " driving you ";
+                information += rides.get(i).getInformation();
+                outputInformation.add(information);
         }
         return outputInformation;
     }
@@ -120,6 +133,7 @@ public class Customer implements Writable {
         return description;
     }
 
+    // EFFECTS: returns a Json object of the Customer object
     @Override
     public JSONObject toJson() {
         JSONObject json = new JSONObject();

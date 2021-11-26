@@ -67,7 +67,7 @@ public class CompanyTest {
         int cost = ourCompany.addOldRide(time, start, end, driver, additional, 5);
         int expectedCost = withinZoneCost + (abs(start - end) + additional) * multiZonesCost;
         assertEquals(expectedCost, cost);
-        assertEquals(0,  ourCompany.getUser().getRideHistory().size());
+        assertEquals(0,  ourCompany.getUser().getRideHistoryUnReviewed().size());
         assertEquals(1, ourCompany.getUser().numberOfRides());
     }
 
@@ -117,6 +117,27 @@ public class CompanyTest {
     }
 
     @Test
+    public void testCorrectDriverInputAvailabilityEqual0() {
+        ourCompany.addRide(time, start, end, driver, additional);
+        assertFalse(ourCompany.correctDriverInput(time, start, driver, false));
+    }
+
+    @Test
+    public void testCorrectDriverInputOtherDriverNoAddedFee() {
+        assertFalse(ourCompany.correctDriverInput(time, start, driver, false));
+    }
+
+    @Test
+    public void testCorrectDriverInputOtherDriverAddedFee() {
+        assertTrue(ourCompany.correctDriverInput(time, start, driver, true));
+    }
+
+    @Test
+    public void testCorrectDriverInputAvailabilityEqualsStart() {
+        assertTrue(ourCompany.correctDriverInput(time, start, start - 1, false));
+    }
+
+    @Test
     public void testGetDriversWithinZoneWithRidesInBetweenDuration() {
         for (int i = 0 ; i < ourCompany.numberOfDrivers(); i++) {
             ourCompany.addRide(time + 1, start, end, i, additional);
@@ -127,9 +148,8 @@ public class CompanyTest {
         } catch (DriversOffWork e) {
             fail("There should be no DriversOffWork Exception");
         }
-
-
     }
+
 
     @Test
     public void testGetDriversWithinZoneWithRides() {

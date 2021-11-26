@@ -2,6 +2,7 @@ package model;
 
 import exceptions.ReviewedRideException;
 import exceptions.RideCannotBeCancelled;
+import exceptions.WrongInputDriver;
 import org.json.JSONObject;
 import persistence.Writable;
 import exceptions.DriversOffWork;
@@ -164,6 +165,13 @@ public class Company implements Writable {
         return addOldRide(time, start, destination, selected, additional, -1);
     }
 
+    // REQUIRES: 0 <= time <= 22, 1 <= start <= 5,  0 <= selected < number of drivers created
+    // EFFECTS: returns true if the driver selected is from the list provided
+    public boolean correctDriverInput(int time, int start, int selected, boolean addFee) {
+        return  !(drivers.get(selected).getAvailability(time) == 0
+                || drivers.get(selected).getAvailability(time) != start && !addFee);
+    }
+
     /*
        REQUIRES: 0 <= time <= 22, 1 <= start <= 5, 1 <= destination <= 5,
                  0 <= selected < number of drivers created, 0 <= additional <= 4
@@ -201,6 +209,7 @@ public class Company implements Writable {
         EventLog.getInstance().logEvent(new Event(description));
     }
 
+    //EFFECTS: returns a Json object of the Company Object
     @Override
     public JSONObject toJson() {
         JSONObject json = new JSONObject();

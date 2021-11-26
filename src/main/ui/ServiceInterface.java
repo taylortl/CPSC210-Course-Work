@@ -3,6 +3,7 @@ package ui;
 import exceptions.DriversOffWork;
 import exceptions.ReviewedRideException;
 import exceptions.RideCannotBeCancelled;
+import exceptions.WrongInputDriver;
 import model.Company;
 import model.Customer;
 import model.EventLog;
@@ -18,6 +19,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.SQLOutput;
 import java.util.Iterator;
 import java.util.List;
 
@@ -61,17 +63,19 @@ public class ServiceInterface extends JFrame {
         buttonPanel.setPreferredSize(new Dimension(WIDTH / 4, HEIGHT));
         buttonPanel.setLayout(new GridBagLayout());
         JButton printPrice = new JButton(new PrintPrice());
+        JButton printRides = new JButton(new PrintRides());
         JButton rateDrivers = new JButton(new RateDrivers());
         JButton cancelRide = new JButton(new Cancel());
         JButton bookRide = new JButton(new Booking());
         buttonPanel.add(printPrice, format);
+        buttonPanel.add(printRides, format);
         buttonPanel.add(rateDrivers, format);
         buttonPanel.add(cancelRide, format);
         buttonPanel.add(bookRide, format);
     }
 
     // MODIFIES: this
-    // EFFECTS: initialize the frame design
+    // EFFECTS: initialize the frame design and define how the application reacts before exit
     private void initializeGraphics() {
         // set the size of the application
         setSize(WIDTH, HEIGHT);
@@ -97,7 +101,8 @@ public class ServiceInterface extends JFrame {
     }
 
     // MODIFIES: this
-    // EFFECTS: create the customer serving and the company
+    // EFFECTS: initialize the customer serving at the moment, the company, json writer for saving to file
+    //          json reader for loading from file, and the panels and buttons
     private void initialization() {
         user = new Customer();
         kingdom = new Company(user);
@@ -123,7 +128,7 @@ public class ServiceInterface extends JFrame {
         }
     }
 
-    // EFFECTS: save the rides made by the customer today
+    // EFFECTS: save the rides made by the customer
     private void saveRides() {
         int response = JOptionPane.showConfirmDialog(null,
                 "Do you want to save your rides?", "Save",
@@ -179,7 +184,7 @@ public class ServiceInterface extends JFrame {
     // REQUIRES: action == "cancel" || action == "rating"
     // EFFECTS: prompt the user for reference number after showing rides to the user
     private void promptReferenceNumber(String action) {
-        List<String> rides = user.getRideHistory();
+        List<String> rides = user.getRideHistoryUnReviewed();
         JLabel notice = new JLabel("NOTE: RIDES THAT WERE RATED OR CANCELLED WILL NOT BE SHOWN.");
         outputPanel.add(notice, format);
         if (rides.isEmpty()) {
@@ -202,11 +207,14 @@ public class ServiceInterface extends JFrame {
     private class PromptReferenceListener implements ActionListener {
         private String promptAction;
 
+        // REQUIRES: getAction == "cancel" || getAction == "rating"
+        // EFFECTS: initialize an action with the given action name
         PromptReferenceListener(String getAction) {
             super();
             promptAction = getAction;
         }
 
+        // EFFECTS: defines what is the action after getting the reference according to the given action name
         @Override
         public void actionPerformed(ActionEvent e) {
             int reference = Integer.parseInt(referenceField.getText());
@@ -275,12 +283,14 @@ public class ServiceInterface extends JFrame {
         private int reference;
         private int driverOfRide;
 
+        // EFFECTS: initialize the action with the given reference and driver number
         RateListener(int reference, int driverOfRide) {
             super();
             this.reference = reference;
             this.driverOfRide = driverOfRide;
         }
 
+        // EFFECTS: defines what is the action for rating drivers
         @Override
         public void actionPerformed(ActionEvent e) {
             double rating = Double.parseDouble(ratingField.getText());
@@ -324,6 +334,13 @@ public class ServiceInterface extends JFrame {
 
     // Represent the action taken when the user wants to book a ride
     private class BookingListener implements ActionListener {
+
+        // EFFECTS: initialize the action
+        BookingListener() {
+            super();
+        }
+
+        // EFFECTS: defines the action for booking after entering the time, start and ending zone
         @Override
         public void actionPerformed(ActionEvent e) {
             int time = Integer.parseInt(timeField.getText());
@@ -357,7 +374,7 @@ public class ServiceInterface extends JFrame {
         if (driversAvailable.isEmpty()) {
             addFeeBooking(time, start, destination, duration);
         } else {
-            choosingDriver(driversAvailable, start, time, destination);
+            choosingDriver(driversAvailable, start, time, destination, false);
         }
     }
 
@@ -396,7 +413,7 @@ public class ServiceInterface extends JFrame {
                 outputPanel.add(sorry, format);
                 updatePanel();
             } else {
-                choosingDriver(driversAvailable, start, time, destination);
+                choosingDriver(driversAvailable, start, time, destination, true);
             }
         } else {
             removeComponents();
@@ -413,6 +430,8 @@ public class ServiceInterface extends JFrame {
         private int duration;
         private int destination;
 
+        // REQUIRES: 0 <= time <= 22, 1 <= start <= 5, 1 <= destination <= 5
+        // EFFECTS: initialize the action with the given time, starting zone, duration, and destination zone
         RadioButtonListener(int time, int start, int duration, int destination) {
             super();
             this.time = time;
@@ -421,6 +440,8 @@ public class ServiceInterface extends JFrame {
             this.destination = destination;
         }
 
+        // EFFECTS: defines the action for handling the choice of the user
+        //          (whether the user wants drivers from other zone or not)
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
@@ -437,7 +458,7 @@ public class ServiceInterface extends JFrame {
 
     // REQUIRES: 0 <= time <= 22, 1 <= start <= 5, 1 <= destination <= 5
     // EFFECTS: prints the given list of drivers and prompts the user to choose a driver.
-    private void choosingDriver(List<String> driversAvailable, int start, int time, int destination) {
+    private void choosingDriver(List<String> driversAvailable, int start, int time, int destination, boolean addFee) {
         removeComponents();
         outputPanel.add(new JList(driversAvailable.toArray()), format);
         JLabel promptDriver = new JLabel("Please choose the drivers from above, enter the number of the driver: ");
@@ -445,7 +466,7 @@ public class ServiceInterface extends JFrame {
         driverField = new JTextField(10);
         outputPanel.add(driverField, format);
         JButton submit = new JButton("Process");
-        submit.addActionListener(new ChooseDriverListener(time, start, destination));
+        submit.addActionListener(new ChooseDriverListener(time, start, destination, addFee));
         outputPanel.add(submit, format);
         updatePanel();
     }
@@ -455,19 +476,26 @@ public class ServiceInterface extends JFrame {
         private int time;
         private int start;
         private int destination;
+        private boolean addFee;
 
-        ChooseDriverListener(int time, int start, int destination) {
+        // REQUIRES: 0 <= time <= 22, 1 <= start <= 5, 1 <= destination <= 5
+        // EFFECTS: initialize the action with the given time, starting zone, duration, and destination zone
+        ChooseDriverListener(int time, int start, int destination, boolean addFee) {
             super();
             this.time = time;
             this.start = start;
             this.destination = destination;
+            this.addFee = addFee;
         }
 
+        // EFFECTS: Define the action for choosing driver for booking
         @Override
         public void actionPerformed(ActionEvent e) {
             int chosenDriver = Integer.parseInt(driverField.getText());
             try {
                 if (chosenDriver >= kingdom.numberOfDrivers() || chosenDriver < 0) {
+                    throw new OutOfBoundInput();
+                } else if (!kingdom.correctDriverInput(time, start, chosenDriver, addFee)) {
                     throw new OutOfBoundInput();
                 }
                 int driverZone = kingdom.getDriverZone(chosenDriver);
@@ -483,8 +511,8 @@ public class ServiceInterface extends JFrame {
 
     // REQUIRES: 0 <= time <= 22, 1 <= start <= 5, 1 <= destination <= 5, 0 <= chosenDriver < number of drivers created
     // MODIFIES: ask the Company to book a ride and print the receipt.
-    // EFFECTS: a booking is made
-    private void receipt(int time,int start,int destination,int chosenDriver,int additional) {
+    // EFFECTS: a booking is made and print the cost of the ride
+    private void receipt(int time,int start,int destination,int chosenDriver,int additional) throws OutOfBoundInput {
         removeComponents();
         int cost = kingdom.addRide(time, start, destination, chosenDriver, additional);
         String receipt = "The cost of the ride is $ " + cost
@@ -498,10 +526,12 @@ public class ServiceInterface extends JFrame {
     // represent the action to be taken when the user wants to see the price list
     private class PrintPrice extends AbstractAction {
 
+        // EFFECTS: initialize an action with the name as "View Price List"
         PrintPrice() {
             super("View Price List");
         }
 
+        // EFFECTS: defines the action taken for printing price
         @Override
         public void actionPerformed(ActionEvent evt) {
             String[] price = new String[4];
@@ -517,13 +547,32 @@ public class ServiceInterface extends JFrame {
         }
     }
 
+    // represent the action to be taken when the user wants to see the price list
+    private class PrintRides extends AbstractAction {
+
+        // EFFECTS: initialize an action with the name as "View Price List"
+        PrintRides() {
+            super("View Ride History");
+        }
+
+        // EFFECTS: defines the action taken for printing rides
+        @Override
+        public void actionPerformed(ActionEvent evt) {
+            removeComponents();
+            List<String> rides = user.getRideHistory();
+            outputPanel.add(new JList(rides.toArray()), format);
+            updatePanel();
+        }
+    }
+
     // Represent the action taken when the user wants to rate the driver
     private class RateDrivers extends AbstractAction {
-
+        // EFFECTS: initialize an action with the name as "Rate Our Drivers"
         RateDrivers() {
             super("Rate Our Drivers");
         }
 
+        // EFFECTS: defines the action taken
         @Override
         public void actionPerformed(ActionEvent evt) {
             removeComponents();
@@ -533,11 +582,12 @@ public class ServiceInterface extends JFrame {
 
     // Represent the action taken when the user wants to cancel booking
     private class Cancel extends AbstractAction {
-
+        // EFFECTS: initialize an action with the name as "Cancel Rides"
         Cancel() {
             super("Cancel Rides");
         }
 
+        // EFFECTS: defines the action taken
         @Override
         public void actionPerformed(ActionEvent evt) {
             removeComponents();
@@ -547,11 +597,12 @@ public class ServiceInterface extends JFrame {
 
     // Represent the action taken when the user wants to make a booking
     private class Booking extends AbstractAction {
-
+        // EFFECTS: initialize an action with the name as "Book Rides"
         Booking() {
             super("Book Rides");
         }
 
+        // EFFECTS: defines the action taken
         @Override
         public void actionPerformed(ActionEvent evt) {
             removeComponents();
