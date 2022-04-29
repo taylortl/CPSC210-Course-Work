@@ -1,4 +1,4 @@
-# CPSC210 Course Works
+# CPSC210 Course Work
 
 ## Ride booking system for a day 
 
