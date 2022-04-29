@@ -1,7 +1,7 @@
-# Ride Service
+# CPSC210 Course Works
 
 ## Ride booking system for a day 
-**Author: Choi Ian Leong, Taylor**
+
 
 ***About This Application*** \
 The application provides a ride booking system for customers within 5 zones. 
@@ -25,52 +25,15 @@ And I understand as a customer, I don't want to pay for an unpleasant ride, it's
 This system can also force the drivers to improve their skills or attitude, which makes unpleasant rides avoidable.
 
 
-## User Stories
-As a user, I want to be able to book a ride on the day.\
-As a user, I want to be able to book multiple rides on the day.\
-As a user, I want to be able to cancel the booking(s) of my ride(s).\
-As a user, I want to be able to give a review to my ride(s).\
-As a user, I want to be able to choose my own choice of driver.\
-As a user, I want to be able to look at the price table of the service.\
-As a user, I want to be able to save my ride history.\
-As a user, I want to be able to load my previous ride history.
+##  Functions
+- book a single / multiple ride(s) on the day\
+- cancel valid booking(s) of my ride(s)\
+- give a review after my ride(s)\
+- choose my own choice of driver\
+- price table for the service\
+- save and load ride history\
 
 
-##Phase 4: Task 2
-Thu Nov 25 18:26:37 PST 2021
-Ride made: from zone 1 to zone 2 at 14:00 by Jeremy
-
-
-Thu Nov 25 18:26:45 PST 2021
-Ride made: from zone 3 to zone 2 at 5:00 by Jaden
-
-
-Thu Nov 25 18:26:52 PST 2021
-Ride rated: from zone 3 to zone 2 at 5:00
-Jaden rated 4.6 / 5.0
-
-
-Thu Nov 25 18:26:57 PST 2021
-Ride cancelled: from zone 1 to zone 2 at 14:00
-
-
-Thu Nov 25 18:27:03 PST 2021
-Ride history saved
-
-##Phase4: Task 3
-I understand that my structure in ServiceInterface is a little messy. 
-If I have more time to work on, I would separate ActionListener classes from the user interface class.
-It is more appropriate to create separate classes for the Buttons 
-than making them as instance of the ServiceInterface object. 
-
-On the other hand, it is not efficient to create the driver list everytime the application run. 
-If the application has more than 6 drivers, it would be a lot of works for the program.
-Instead, I would create a json file / Excel file of drivers, and read the information from the file if needed.
-Such that we don't need to create the driver object, we just need JsonReader / FileReader to get the information.
-Same logic could be applied to Customer object if I have not just 1 customer to serve.
-
-For the exceptions, WrongInputDriver exception could be implemented as a child of the OurOfBoundInput exception,
-such that all the exceptions will be under the same package, and the two exceptions can be handled as one.
 
 
 
