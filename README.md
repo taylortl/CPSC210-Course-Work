@@ -26,12 +26,12 @@ This system can also force the drivers to improve their skills or attitude, whic
 
 
 ##  Functions
-- book a single / multiple ride(s) on the day\
-- cancel valid booking(s) of my ride(s)\
-- give a review after my ride(s)\
-- choose my own choice of driver\
-- price table for the service\
-- save and load ride history\
+- book a single / multiple ride(s) on the day
+- cancel valid booking(s) of my ride(s)
+- give a review after my ride(s)
+- choose my own choice of driver
+- price table for the service
+- save and load ride history
 
 
 
