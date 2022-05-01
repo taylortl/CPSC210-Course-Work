@@ -25,13 +25,13 @@ This system can also force the drivers to improve their skills or attitude, whic
 
 ##  Functions 
 - book a single / multiple ride(s) on the day
-<img width="312" alt="image" src="https://user-images.githubusercontent.com/91409130/166129151-c1201456-083f-4e90-9200-3641a4841599.png">
+<img width="339" alt="image" src="https://user-images.githubusercontent.com/91409130/166129253-1ae76d11-a990-45df-bc0f-456211bc528f.png">
 - cancel valid booking(s) of my ride(s)
-<img width="317" alt="image" src="https://user-images.githubusercontent.com/91409130/166129165-4414cc86-0411-43e4-afd3-061d7ac41f94.png">
+<img width="339" alt="image" src="https://user-images.githubusercontent.com/91409130/166129245-53e4431e-1342-4d04-bd61-5abab72935b0.png">
 - give a review after my ride(s)
-<img width="318" alt="image" src="https://user-images.githubusercontent.com/91409130/166129138-3462ce42-c3d8-4957-81ff-5228c327e43c.png">
+<img width="338" alt="image" src="https://user-images.githubusercontent.com/91409130/166129236-2e9b727c-98e1-4b50-b695-ed0b4b5f0b6f.png">
 - price table for the service
-<img width="332" alt="image" src="https://user-images.githubusercontent.com/91409130/166129172-086f609e-17a8-45d7-8ceb-ab11cfa5680e.png">
+<img width="340" alt="image" src="https://user-images.githubusercontent.com/91409130/166129203-ae9b4dcf-3ad1-4009-a1c2-d9ba3cc269f1.png">
 - save and load ride history
 <img width="340" alt="image" src="https://user-images.githubusercontent.com/91409130/166129093-431efc99-38d9-4247-bb7f-bfec50a13ae3.png">
 
