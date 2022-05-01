@@ -23,13 +23,20 @@ And I understand as a customer, I don't want to pay for an unpleasant ride, it's
 This system can also force the drivers to improve their skills or attitude, which makes unpleasant rides avoidable.
 
 
-##  Functions
+##  Functions 
 - book a single / multiple ride(s) on the day
+<img width="312" alt="image" src="https://user-images.githubusercontent.com/91409130/166129151-c1201456-083f-4e90-9200-3641a4841599.png">
 - cancel valid booking(s) of my ride(s)
+<img width="317" alt="image" src="https://user-images.githubusercontent.com/91409130/166129165-4414cc86-0411-43e4-afd3-061d7ac41f94.png">
 - give a review after my ride(s)
-- choose my own choice of driver
+<img width="318" alt="image" src="https://user-images.githubusercontent.com/91409130/166129138-3462ce42-c3d8-4957-81ff-5228c327e43c.png">
 - price table for the service
+<img width="332" alt="image" src="https://user-images.githubusercontent.com/91409130/166129172-086f609e-17a8-45d7-8ceb-ab11cfa5680e.png">
 - save and load ride history
+<img width="340" alt="image" src="https://user-images.githubusercontent.com/91409130/166129093-431efc99-38d9-4247-bb7f-bfec50a13ae3.png">
+
+
+
 
 
 
