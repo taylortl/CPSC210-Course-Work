@@ -1,4 +1,4 @@
-# Ride booking system for a day 
+# Ride booking system for a day (Course work)
 
 
 ***About This Application*** \
